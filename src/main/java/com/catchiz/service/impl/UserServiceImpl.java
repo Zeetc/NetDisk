@@ -39,8 +39,11 @@ public class UserServiceImpl implements UserService {
         userMapper.register(user);
         int userId=user.getId();
         File file=new File(FileController.fileStorePath+"\\"+userId);
-        file.mkdir();
-        return userId;
+        if(file.mkdir()){
+            return userId;
+        }
+        userMapper.delUser(userId);
+        return -1;
     }
 
     @Override

@@ -27,7 +27,11 @@ public class UserController {
     public ModelAndView register(User user) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
         ModelAndView modelAndView=new ModelAndView();
         int userId=userService.register(user);
-        modelAndView.addObject("userId",userId);
+        if(userId!=-1) {
+            modelAndView.addObject("userId", userId);
+        }else {
+            modelAndView.addObject("registerFail",true);
+        }
         modelAndView.setViewName("registerInfo");
         return modelAndView;
     }

@@ -5,10 +5,6 @@ import com.catchiz.mapper.FileMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 
 @Service
@@ -19,9 +15,9 @@ public class FileUtils {
         this.fileMapper = fileMapper;
     }
 
-    public void createDir(String foldName,String path,int uid,int pid) throws IOException {
-        File dir=new File(path);
-        dir.mkdir();
+    public boolean createDir(String foldName,String path,int uid,int pid){
+        boolean dir=new File(path).mkdir();
+        if(!dir)return false;
         MyFile file=new MyFile();
         file.setFilename(foldName);
         file.setFilePath(path);
@@ -31,23 +27,25 @@ public class FileUtils {
         file.setUid(uid);
         file.setPid(pid);
         fileMapper.storeFile(file);
+        return true;
     }
 
-    public void delFile(String filePath){
+    public boolean delFile(String filePath){
         File file=new File(filePath);
-        delFileRecur(file);
+        return delFileRecur(file);
     }
 
-    public void delFileRecur(File file) throws NullPointerException{
+    public boolean delFileRecur(File file) throws NullPointerException{
         if(!file.isDirectory()){
             fileMapper.delFileByPath(file.getPath());
-            file.delete();
-            return;
+            return file.delete();
         }
         File[] files=file.listFiles();
-        for (File subFile : files) {
-            delFileRecur(subFile);
+        if (files != null) {
+            for (File subFile : files) {
+                delFileRecur(subFile);
+            }
         }
-        file.delete();
+        return file.delete();
     }
 }

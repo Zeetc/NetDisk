@@ -12,7 +12,16 @@
     <title>注册结果页面</title>
 </head>
 <body>
-你的id号码是：${userId}
+
+<c:choose>
+    <c:when test="${registerFail}">
+        注册失败
+    </c:when>
+    <c:otherwise>
+        你的id号码是：${userId}
+    </c:otherwise>
+</c:choose>
+
 <br>
 <a href="${pageContext.request.contextPath}/file/subFile">去home</a>
 </body>

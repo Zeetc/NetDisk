@@ -7,10 +7,7 @@ import com.catchiz.service.FileService;
 import com.catchiz.utils.FileUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 @Service("fileService")
 public class FileServiceImpl implements FileService {
@@ -32,15 +29,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void storeFile(MyFile file) throws IOException {
+    public void storeFile(MyFile file) {
         fileMapper.storeFile(file);
     }
 
     @Override
-    public void delFile(int fileId) {
+    public boolean delFile(int fileId) {
         String filePath=fileMapper.getPathById(fileId);
         fileMapper.delFile(fileId);
-        fileUtils.delFile(filePath);
+        return fileUtils.delFile(filePath);
     }
 
     @Override
@@ -70,10 +67,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void createFolder(String foldName, int uid,int pid) throws IOException {
+    public boolean createFolder(String foldName, int uid,int pid) {
         String prePath=(pid==-1?FileController.fileStorePath+"\\"+uid:fileMapper.getPathById(pid));
         String path=prePath+"\\"+foldName;
-        fileUtils.createDir(foldName,path,uid,pid);
+        return fileUtils.createDir(foldName,path,uid,pid);
     }
 
     @Override
@@ -84,16 +81,12 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<MyFile> findByInfo(int pid,int userId,int curPage,int pageSize,String fileName,boolean isIgnoreValid){
         int start= (curPage-1)*pageSize;
-        StringBuilder sb=new StringBuilder("%");
-        sb.append(fileName).append("%");
-        return fileMapper.findByInfo(pid,userId,start,pageSize,sb.toString(),isIgnoreValid);
+        return fileMapper.findByInfo(pid,userId,start,pageSize, "%" + fileName + "%",isIgnoreValid);
     }
 
     @Override
     public int findCountByInfo(int pid, int userId, String fileName, boolean isIgnoreValid) {
-        StringBuilder sb=new StringBuilder("%");
-        sb.append(fileName).append("%");
-        return fileMapper.findCountByInfo(pid,userId,sb.toString(),isIgnoreValid);
+        return fileMapper.findCountByInfo(pid,userId, "%" + fileName + "%",isIgnoreValid);
     }
 
 

@@ -10,7 +10,7 @@ public interface FileService {
 
     void storeFile(MyFile file) throws IOException;
 
-    void delFile(int fileId);
+    boolean delFile(int fileId);
 
     void changeFileValid(int fileId,int isValidFile);
 
@@ -20,7 +20,7 @@ public interface FileService {
 
     int getCurPid(int pid);
 
-    void createFolder(String foldName, int uid, int pid) throws IOException;
+    boolean createFolder(String foldName, int uid, int pid) throws IOException;
 
     String getFilePathById(int id);
 
