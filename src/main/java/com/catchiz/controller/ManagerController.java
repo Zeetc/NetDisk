@@ -29,7 +29,6 @@ public class ManagerController {
     @RequestMapping("/login")
     public String login(User user, HttpSession session){
         User manager=userService.managerLogin(user);
-        System.out.println(manager);
         if(manager!=null){
             session.setAttribute("manager",true);
             session.setAttribute("user",manager);
