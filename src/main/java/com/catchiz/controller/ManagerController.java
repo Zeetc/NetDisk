@@ -89,11 +89,7 @@ public class ManagerController {
         modelAndView.addObject("pid",pid);
         modelAndView.setViewName("userFiles");
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
-        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount/PAGE_SIZE : (totalCount/PAGE_SIZE) + 1 ;
-        if(totalPage==0)totalPage = 1;
-        modelAndView.addObject("totalPage",totalPage);
-        modelAndView.addObject("curPage",curPage);
-        modelAndView.addObject("fileName",fileName);
+        FileController.packModelInfo(curPage, fileName, modelAndView, totalCount, PAGE_SIZE);
         modelAndView.addObject("userId",userId);
         return modelAndView;
     }

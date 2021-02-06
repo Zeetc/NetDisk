@@ -90,12 +90,20 @@ public class FileController {
         modelAndView.addObject("pid",pid);
         modelAndView.setViewName("homePage");
         int totalCount=fileService.findCountByInfo(pid,user.getId(),fileName,false);
-        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount/PAGE_SIZE : (totalCount/PAGE_SIZE) + 1 ;
+        packModelInfo(curPage, fileName, modelAndView, totalCount, PAGE_SIZE);
+        return modelAndView;
+    }
+
+    static void packModelInfo(@RequestParam(value = "curPage", required = false, defaultValue = "1") int curPage,
+                              @RequestParam(value = "fileName", required = false, defaultValue = "null") String fileName,
+                              ModelAndView modelAndView,
+                              int totalCount,
+                              int pageSize) {
+        int totalPage = totalCount % pageSize == 0 ? totalCount/ pageSize : (totalCount/ pageSize) + 1 ;
         if(totalPage==0)totalPage = 1;
         modelAndView.addObject("totalPage",totalPage);
         modelAndView.addObject("curPage",curPage);
         modelAndView.addObject("fileName",fileName);
-        return modelAndView;
     }
 
     @RequestMapping("/parentFile")
@@ -109,7 +117,8 @@ public class FileController {
     @RequestMapping("/addFolder")
     public String addFolder(@RequestParam("foldName") String foldName,
                             @RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
-                            HttpSession session,RedirectAttributes attributes) throws IOException {
+                            HttpSession session,
+                            RedirectAttributes attributes) throws IOException {
         User user=(User)session.getAttribute("user");
         fileService.createFolder(foldName,user.getId(),pid);
         attributes.addAttribute("pid",pid);
@@ -120,7 +129,8 @@ public class FileController {
     public String delFile(int fileId,
                           @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                           @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
-                          HttpSession session, RedirectAttributes attributes){
+                          HttpSession session,
+                          RedirectAttributes attributes){
         User user= (User) session.getAttribute("user");
         MyFile file=fileService.getFileById(fileId);
         if(user.getId()==file.getUid())fileService.delFile(fileId);
