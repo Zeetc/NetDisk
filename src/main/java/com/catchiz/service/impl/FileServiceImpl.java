@@ -33,9 +33,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void storeFile(MyFile file) throws IOException {
-        Queue<MyFile> scanQueue=new LinkedList<>();
-        scanQueue.offer(file);
-        fileUtils.scanFile(scanQueue);
+        fileMapper.storeFile(file);
     }
 
     @Override

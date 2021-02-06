@@ -112,7 +112,7 @@ public class ManagerController {
     @RequestMapping("/exit")
     public String exit(HttpServletRequest request){
         request.getSession().invalidate();
-        return "redirect:managerLogin";
+        return "redirect:/managerLogin";
     }
 
 }
