@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+">
+
+    <!--mvc注解驱动-->
+    <mvc:annotation-driven/>
+
+    <!--配置视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+
+    <!--静态资源权限开放-->
+    <mvc:default-servlet-handler/>
+
+    <!--组件扫描controller-->
+    <context:component-scan base-package="com.catchiz.controller"/>
+
+    <!-- 用户登录过滤器 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/*"/>
+            <mvc:mapping path="/file/*"/>
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/user/register"/>
+            <bean class="com.catchiz.interceptor.PrivilegeInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/manager/*"/>
+            <mvc:exclude-mapping path="/manager/login"/>
+            <bean class="com.catchiz.interceptor.ManagerInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 异常配置-->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <!-- 最后完善了再加这个-->
+        <!--  <property name="defaultErrorView" value="error"/> -->
+        <property name="exceptionMappings">
+            <map>
+                <!-- 异常抓包 -->
+                <entry key="org.springframework.dao.EmptyResultDataAccessException" value="login"/>
+                <entry key="java.sql.SQLIntegrityConstraintViolationException" value="register"/>
+                <entry key="org.springframework.dao.DataIntegrityViolationException" value="register"/>
+                <entry key="java.io.FileNotFoundException" value="homePage"/>
+                <entry key="java.io.IOException" value="homePage"/>
+
+            </map>
+        </property>
+    </bean>
+
+    <!-- 文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="maxUploadSize" value="999999999999999999"/>
+    </bean>
+
+</beans>
