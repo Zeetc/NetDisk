@@ -20,15 +20,6 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<MyFile> listAllMyFile(int userId,int pid) {
-        List<MyFile> myFileList = fileMapper.listAllMyFile(userId, pid);
-        for (MyFile myFile : myFileList) {
-            myFile.setFilePath(myFile.getFilePath().replace("\\","/"));
-        }
-        return myFileList;
-    }
-
-    @Override
     public void storeFile(MyFile file) {
         fileMapper.storeFile(file);
     }
@@ -43,15 +34,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public void changeFileValid(int fileId,int isValidFile) {
         fileMapper.changeFileValid(fileId,isValidFile==1?0:1);
-    }
-
-    @Override
-    public List<MyFile> listAllMyFileIgnoreValid(int userId,int pid) {
-        List<MyFile> myFileList = fileMapper.listAllMyFileIgnoreValid(userId,pid);
-        for (MyFile myFile : myFileList) {
-            myFile.setFilePath(myFile.getFilePath().replace("\\","/"));
-        }
-        return myFileList;
     }
 
     @Override

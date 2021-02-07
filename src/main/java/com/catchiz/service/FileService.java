@@ -6,15 +6,12 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FileService {
-    List<MyFile> listAllMyFile(int userId,int pid);
 
     void storeFile(MyFile file) throws IOException;
 
     boolean delFile(int fileId);
 
     void changeFileValid(int fileId,int isValidFile);
-
-    List<MyFile> listAllMyFileIgnoreValid(int userId,int pid);
 
     MyFile getFileById(int fileId);
 

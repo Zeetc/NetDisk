@@ -6,9 +6,6 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 public interface FileMapper {
-    @Select("select * from file where uid = #{userId} and file.isValidFile=1 and pid =#{pid}")
-    List<MyFile> listAllMyFile(@Param("userId") int userId,@Param("pid") int pid);
-
     @Insert("insert into file values(#{fileId},#{filename},#{filePath},#{fileSize},\n" +
             "                        #{isValidFile},#{uploadDate},#{contentType},#{uid},#{pid})")
     void storeFile(MyFile file);
@@ -21,9 +18,6 @@ public interface FileMapper {
 
     @Update("update file set isValidFile = #{isValidFile} where fileId = #{fileId}")
     void changeFileValid(@Param("fileId") int fileId,@Param("isValidFile") int isValidFile);
-
-    @Select("select * from file where uid = #{userId} and pid = ${pid}")
-    List<MyFile> listAllMyFileIgnoreValid(@Param("userId") int userId,@Param("pid") int pid);
 
     @Select("select * from file where fileId = #{fileId}")
     MyFile getFileById(int fileId);
