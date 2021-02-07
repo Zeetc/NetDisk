@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @RequestMapping("/register")
-    public ModelAndView register(User user) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
+    public ModelAndView register(User user,HttpSession session) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
         ModelAndView modelAndView=new ModelAndView();
         int userId=userService.register(user);
         if(userId!=-1) {
@@ -33,6 +33,7 @@ public class UserController {
             modelAndView.addObject("registerFail",true);
         }
         modelAndView.setViewName("registerInfo");
+        session.setAttribute("user",user);
         return modelAndView;
     }
 
