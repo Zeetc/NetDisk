@@ -50,20 +50,20 @@
 
     <!-- 事务控制，暂时全局事务 -->
     <!-- 平台事务管理器 -->
-    <!--<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
-    </bean>-->
+    </bean>
 
-    <!-- 配置事务增强 -->
-    <!--<tx:advice id="txAdvice">
+    <!--配置事务增强-->
+    <tx:advice id="txAdvice">
         <tx:attributes>
             <tx:method name="*"/>
         </tx:attributes>
-    </tx:advice>-->
+    </tx:advice>
 
-    <!-- aop织入 -->
-    <!--<aop:config>
+    <!--事务的aop织入-->
+    <aop:config>
         <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.catchiz.service.impl.*.*(..))"/>
-    </aop:config>-->
+    </aop:config>
 
 </beans>

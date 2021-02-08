@@ -2,8 +2,8 @@ package com.catchiz.controller;
 
 import com.catchiz.domain.MyFile;
 import com.catchiz.domain.User;
-import com.catchiz.service.impl.FileServiceImpl;
-import com.catchiz.service.impl.UserServiceImpl;
+import com.catchiz.service.FileService;
+import com.catchiz.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,10 +18,10 @@ import java.util.List;
 @Controller
 @RequestMapping("/manager")
 public class ManagerController {
-    private final UserServiceImpl userService;
-    private final FileServiceImpl fileService;
+    private final UserService userService;
+    private final FileService fileService;
 
-    public ManagerController(UserServiceImpl userService, FileServiceImpl fileService) {
+    public ManagerController(UserService userService, FileService fileService) {
         this.userService = userService;
         this.fileService = fileService;
     }
