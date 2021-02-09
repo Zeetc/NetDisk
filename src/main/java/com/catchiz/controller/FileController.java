@@ -49,7 +49,7 @@ public class FileController {
         if(user.getId()!=file.getUid())return;
         FileInputStream fis=new FileInputStream(file.getFilePath());
         response.setHeader("content-type",file.getContentType());
-        response.setHeader("content-disposition","attachment;filename="+file.getFilename());
+        response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
         ServletOutputStream sos=response.getOutputStream();
         byte[] buff=new byte[1024*8];
         int len;
