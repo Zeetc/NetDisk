@@ -28,6 +28,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void storeFile(MyFile file) {
+        if(fileMapper.getFileByPath(file.getFilePath())!=null)return;
         fileMapper.storeFile(file);
     }
 
