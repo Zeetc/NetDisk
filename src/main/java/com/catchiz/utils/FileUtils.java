@@ -46,6 +46,7 @@ public class FileUtils {
                 delFileRecur(subFile);
             }
         }
+        fileMapper.delFileByPath(file.getPath());
         return file.delete();
     }
 }

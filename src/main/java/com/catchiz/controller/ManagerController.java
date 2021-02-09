@@ -39,7 +39,7 @@ public class ManagerController {
     @RequestMapping("/loginUI")
     public String loginUI(HttpSession session){
         if(session.getAttribute("manager")!=null)return "redirect:/manager/getAllUser";
-        return "redirect:managerLogin";
+        return "managerLogin";
     }
 
     @RequestMapping("/getAllUser")
@@ -62,7 +62,7 @@ public class ManagerController {
                           @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                           @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
                           RedirectAttributes attributes){
-        fileService.delFile(fileId);
+        if(!fileService.delFile(fileId))return "error";
         attributes.addAttribute("userId",uid);
         attributes.addAttribute("curPage",curPage);
         attributes.addAttribute("fileName",fileName);
@@ -107,7 +107,7 @@ public class ManagerController {
     @RequestMapping("/exit")
     public String exit(HttpServletRequest request){
         request.getSession().invalidate();
-        return "redirect:managerLogin";
+        return "managerLogin";
     }
 
 }

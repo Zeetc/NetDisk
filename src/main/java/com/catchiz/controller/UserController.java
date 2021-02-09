@@ -40,7 +40,7 @@ public class UserController {
     @RequestMapping("/loginUI")
     public String loginUi(HttpSession session){
         if(session.getAttribute("user")!=null)return "redirect:/file/subFile";
-        return "redirect:login";
+        return "login";
     }
 
     @RequestMapping("/login")
@@ -53,7 +53,7 @@ public class UserController {
     @RequestMapping("/exit")
     public String exit(HttpServletRequest request){
         request.getSession().invalidate();
-        return "redirect:login";
+        return "login";
     }
 
 }

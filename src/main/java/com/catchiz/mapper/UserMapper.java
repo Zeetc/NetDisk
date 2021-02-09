@@ -5,16 +5,18 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
+@Component("userMapper")
 public interface UserMapper {
     @Select("select * from user")
     List<User> getAllUser();
 
     @Insert("insert into user values(#{id},#{username},#{password},#{email},#{registerDate},#{isManager})")
-    @Options(useGeneratedKeys = true, keyColumn = "id")
+    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     void register(User user) throws SQLIntegrityConstraintViolationException;
 
     @Select("select * from user where username = #{username} and password = #{password}")

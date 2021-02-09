@@ -2,11 +2,16 @@ package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
 import com.catchiz.domain.MyFile;
+import com.catchiz.domain.User;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.FileUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service("fileService")
@@ -71,7 +76,51 @@ public class FileServiceImpl implements FileService {
         return fileMapper.findCountByInfo(pid,userId, "%" + fileName + "%",isIgnoreValid);
     }
 
+    @Override
+    public MyFile getFileByPath(String filePath) {
+        return fileMapper.getFileByPath(filePath);
+    }
 
+    @Override
+    public boolean storeFilePrepare(MultipartFile multipartFile, User user,int pid) throws IOException {
+        String filename= multipartFile.getOriginalFilename();
+        if(filename==null)return false;
+        String prePath=(pid==-1?FileController.fileStorePath+"\\"+user.getId():getFilePathById(pid));
+        String[] dirs=filename.split("/");
+        int dynamicPid=pid;
+        for (int i = 0; i < dirs.length - 1; i++) {
+            prePath+="\\"+dirs[i];
+            MyFile myFile=getFileByPath(prePath);
+            if(myFile==null){
+                myFile=new MyFile();
+                File temp=new File(prePath);
+                if(!temp.mkdir())return false;
+                //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
+                dynamicConstructMyFile(myFile,dirs[i],prePath,0,1,null, user.getId(), dynamicPid);
+                storeFile(myFile);
+            }
+            dynamicPid=myFile.getFileId();
+        }
+        //存储位置 仓库路径+用户名+文件名
+        String path=prePath+"\\"+dirs[dirs.length-1];
+        multipartFile.transferTo(new File(path));
+        MyFile file=new MyFile();
+        //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
+        dynamicConstructMyFile(file,dirs[dirs.length-1],path, multipartFile.getSize(), 1,multipartFile.getContentType(), user.getId(), dynamicPid);
+        storeFile(file);
+        return true;
+    }
+
+    public void dynamicConstructMyFile(MyFile myFile,String fileName,String filePath,long fileSize,int isValidFile,String contentType,int uid,int pid){
+        if(fileName!=null)myFile.setFilename(fileName);
+        if(filePath!=null)myFile.setFilePath(filePath);
+        if(fileSize!=0)myFile.setFileSize(fileSize);
+        myFile.setIsValidFile(isValidFile);
+        myFile.setUploadDate(new Timestamp(System.currentTimeMillis()));
+        if(contentType!=null)myFile.setContentType(contentType);
+        myFile.setUid(uid);
+        myFile.setPid(pid);
+    }
 
 
 }

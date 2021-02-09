@@ -13,10 +13,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.List;
 
 @Controller
@@ -36,24 +34,8 @@ public class FileController {
                              @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
                              HttpSession session,RedirectAttributes attributes) throws IOException {
         User user= (User) session.getAttribute("user");
-        String prePath=(pid==-1?fileStorePath+"\\"+user.getId():fileService.getFilePathById(pid));
         for (MultipartFile multipartFile : uploadFile) {
-            String filename= multipartFile.getOriginalFilename();
-            //存储位置 仓库路径+用户名+文件名
-            String path=prePath+"\\"+filename;
-            multipartFile.transferTo(new File(path));
-
-            MyFile file=new MyFile();
-            file.setFilename(filename);
-            file.setFilePath(path);
-            file.setFileSize(multipartFile.getSize());
-            //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
-            file.setIsValidFile(1);
-            file.setUploadDate(new Timestamp(System.currentTimeMillis()));
-            file.setContentType(multipartFile.getContentType());
-            file.setUid(user.getId());
-            file.setPid(pid);
-            fileService.storeFile(file);
+            if(!fileService.storeFilePrepare(multipartFile,user,pid))return "error";
         }
         attributes.addAttribute("pid",pid);
         return "redirect:/file/subFile";
@@ -120,9 +102,10 @@ public class FileController {
                             HttpSession session,
                             RedirectAttributes attributes) throws IOException {
         User user=(User)session.getAttribute("user");
-        fileService.createFolder(foldName,user.getId(),pid);
+        boolean flag=fileService.createFolder(foldName,user.getId(),pid);
         attributes.addAttribute("pid",pid);
-        return "redirect:/file/subFile";
+        if(flag)return "redirect:/file/subFile";
+        return "error";
     }
 
     @RequestMapping("/delFile")

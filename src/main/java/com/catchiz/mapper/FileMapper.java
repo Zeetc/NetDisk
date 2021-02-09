@@ -2,13 +2,19 @@ package com.catchiz.mapper;
 
 import com.catchiz.domain.MyFile;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component("fileMapper")
 public interface FileMapper {
     @Insert("insert into file values(#{fileId},#{filename},#{filePath},#{fileSize},\n" +
             "                        #{isValidFile},#{uploadDate},#{contentType},#{uid},#{pid})")
+    @Options(useGeneratedKeys = true,keyColumn = "fileId",keyProperty = "fileId")
     void storeFile(MyFile file);
+
+    @Select("select * from file where filePath = #{filePath}")
+    MyFile getFileByPath(@Param("filePath") String filePath);
 
     @Delete("delete from file where uid = #{uid}")
     void delFileByUser(int userId);

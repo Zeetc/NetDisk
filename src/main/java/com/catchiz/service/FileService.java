@@ -1,6 +1,8 @@
 package com.catchiz.service;
 
 import com.catchiz.domain.MyFile;
+import com.catchiz.domain.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,4 +26,8 @@ public interface FileService {
     List<MyFile> findByInfo(int pid,int userId,int curPage,int pageSize,String fileName,boolean isIgnoreValid);
 
     int findCountByInfo(int pid, int userId, String fileName, boolean isIgnoreValid);
+
+    MyFile getFileByPath(String filePath);
+
+    boolean storeFilePrepare(MultipartFile multipartFile, User user, int pid) throws IOException;
 }
