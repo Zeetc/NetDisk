@@ -7,6 +7,7 @@ import com.catchiz.mapper.FileMapper;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.FileUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Service("fileService")
+@Transactional
 public class FileServiceImpl implements FileService {
     private final FileMapper fileMapper;
     private final FileUtils fileUtils;

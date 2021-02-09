@@ -9,6 +9,7 @@ import com.catchiz.utils.FileUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @Service("userService")
+@Transactional
 public class UserServiceImpl implements UserService {
     private final FileMapper fileMapper;
     private final UserMapper userMapper;
