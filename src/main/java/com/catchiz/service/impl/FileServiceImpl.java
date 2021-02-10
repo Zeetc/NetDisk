@@ -46,9 +46,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public MyFile getFileById(int fileId) {
-        MyFile myFile=fileMapper.getFileById(fileId);
-        myFile.setFilePath(myFile.getFilePath().replace("\\","/"));
-        return myFile;
+        return fileMapper.getFileById(fileId);
     }
 
     @Override
@@ -58,8 +56,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public boolean createFolder(String foldName, int uid,int pid) {
-        String prePath=(pid==-1?FileController.fileStorePath+"\\"+uid:fileMapper.getPathById(pid));
-        String path=prePath+"\\"+foldName;
+        String prePath=(pid==-1?FileController.fileStorePath+"/"+uid:fileMapper.getPathById(pid));
+        String path=prePath+"/"+foldName;
         return fileUtils.createDir(foldName,path,uid,pid);
     }
 
@@ -88,11 +86,11 @@ public class FileServiceImpl implements FileService {
     public boolean storeFilePrepare(MultipartFile multipartFile, User user,int pid) throws IOException {
         String filename= multipartFile.getOriginalFilename();
         if(filename==null)return false;
-        String prePath=(pid==-1?FileController.fileStorePath+"\\"+user.getId():getFilePathById(pid));
+        String prePath=(pid==-1?FileController.fileStorePath+"/"+user.getId():getFilePathById(pid));
         String[] dirs=filename.split("/");
         int dynamicPid=pid;
         for (int i = 0; i < dirs.length - 1; i++) {
-            prePath+="\\"+dirs[i];
+            prePath+="/"+dirs[i];
             MyFile myFile=getFileByPath(prePath);
             if(myFile==null){
                 myFile=new MyFile();
@@ -105,7 +103,7 @@ public class FileServiceImpl implements FileService {
             dynamicPid=myFile.getFileId();
         }
         //存储位置 仓库路径+用户名+文件名
-        String path=prePath+"\\"+dirs[dirs.length-1];
+        String path=prePath+"/"+dirs[dirs.length-1];
         multipartFile.transferTo(new File(path));
         MyFile file=new MyFile();
         //TODO 默认为0，代表非法资源，需审核，试验期间暂为1

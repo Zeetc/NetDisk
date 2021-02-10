@@ -37,7 +37,7 @@ public class FileUtils {
 
     public boolean delFileRecur(File file) throws NullPointerException{
         if(!file.isDirectory()){
-            fileMapper.delFileByPath(file.getPath());
+            fileMapper.delFileByPath(file.getPath().replace("\\","/"));
             return file.delete();
         }
         File[] files=file.listFiles();
@@ -46,7 +46,7 @@ public class FileUtils {
                 delFileRecur(subFile);
             }
         }
-        fileMapper.delFileByPath(file.getPath());
+        fileMapper.delFileByPath(file.getPath().replace("\\","/"));
         return file.delete();
     }
 }

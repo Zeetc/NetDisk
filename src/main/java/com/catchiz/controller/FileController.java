@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/file")
 public class FileController {
 
-    public static final String fileStorePath="F:\\Cui\\fileStore";
+    public static final String fileStorePath="F:/Cui/fileStore";
 
     private final FileService fileService;
 
