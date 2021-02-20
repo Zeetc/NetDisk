@@ -102,7 +102,8 @@ public class FileController {
                             HttpSession session,
                             RedirectAttributes attributes) throws IOException {
         User user=(User)session.getAttribute("user");
-        boolean flag=fileService.createFolder(foldName,user.getId(),pid);
+        boolean flag=true;
+        if(!foldName.equals(""))flag=fileService.createFolder(foldName,user.getId(),pid);
         attributes.addAttribute("pid",pid);
         if(flag)return "redirect:/file/subFile";
         return "error";
