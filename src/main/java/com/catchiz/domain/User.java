@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 @Data
 public class User {
-    private int id;
+    private Integer id;
 
     private String username;
 
@@ -16,6 +16,6 @@ public class User {
 
     private Timestamp registerDate;
 
-    private int isManager;
+    private Integer isManager;
 
 }

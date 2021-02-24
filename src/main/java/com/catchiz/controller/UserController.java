@@ -3,9 +3,12 @@ package com.catchiz.controller;
 
 import com.catchiz.domain.User;
 import com.catchiz.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -23,7 +26,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping("/register")
+    @PostMapping("/register")
+    @ApiOperation("用户注册")
     public ModelAndView register(User user,HttpSession session) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
         ModelAndView modelAndView=new ModelAndView();
         int userId=userService.register(user);
@@ -37,20 +41,23 @@ public class UserController {
         return modelAndView;
     }
 
-    @RequestMapping("/loginUI")
+    @GetMapping("/loginUI")
+    @ApiOperation("跳转到普通用户登录界面")
     public String loginUi(HttpSession session){
         if(session.getAttribute("user")!=null)return "redirect:/file/subFile";
         return "login";
     }
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
+    @ApiOperation("普通用户登录")
     public String login(User user, HttpSession session) throws EmptyResultDataAccessException{
         User u=userService.login(user);
         if(user!=null)session.setAttribute("user",u);
         return "redirect:/file/subFile";
     }
 
-    @RequestMapping("/exit")
+    @GetMapping("/exit")
+    @ApiOperation("普通用户退出")
     public String exit(HttpServletRequest request){
         request.getSession().invalidate();
         return "login";

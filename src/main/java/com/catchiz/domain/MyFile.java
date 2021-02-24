@@ -6,22 +6,22 @@ import java.sql.Timestamp;
 
 @Data
 public class MyFile {
-    private int fileId;
+    private Integer fileId;
 
     private String filename;
 
     private String filePath;
 
-    private long fileSize;
+    private Long fileSize;
 
-    private int isValidFile;
+    private Integer isValidFile;
 
     private Timestamp uploadDate;
 
     private String contentType;
 
-    private int uid;
+    private Integer uid;
 
-    private int pid;
+    private Integer pid;
 
 }

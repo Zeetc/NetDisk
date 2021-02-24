@@ -4,10 +4,9 @@ import com.catchiz.domain.MyFile;
 import com.catchiz.domain.User;
 import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,7 +25,8 @@ public class ManagerController {
         this.fileService = fileService;
     }
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
+    @ApiOperation("管理用户登录")
     public String login(User user, HttpSession session){
         User manager=userService.managerLogin(user);
         if(manager!=null){
@@ -36,13 +36,15 @@ public class ManagerController {
         return "redirect:/manager/getAllUser";
     }
 
-    @RequestMapping("/loginUI")
+    @GetMapping("/loginUI")
+    @ApiOperation("跳转到管理登录页面")
     public String loginUI(HttpSession session){
         if(session.getAttribute("manager")!=null)return "redirect:/manager/getAllUser";
         return "managerLogin";
     }
 
-    @RequestMapping("/getAllUser")
+    @GetMapping("/getAllUser")
+    @ApiOperation("获取所有用户")
     public ModelAndView getAllUser(){
         List<User> userList=userService.getAllUser();
         ModelAndView modelAndView=new ModelAndView();
@@ -51,25 +53,28 @@ public class ManagerController {
         return modelAndView;
     }
 
-    @RequestMapping("/delUser/{userId}")
+    @DeleteMapping("/delUser/{userId}")
+    @ApiOperation("删除用户")
     public String delUser(@PathVariable("userId") int userId){
         userService.delUser(userId);
         return "redirect:/manager/getAllUser";
     }
 
-    @RequestMapping("/delFile")
+    @DeleteMapping("/delFile")
+    @ApiOperation("删除文件")
     public String delFile(int fileId,int uid,
                           @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                           @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
                           RedirectAttributes attributes){
-        if(!fileService.delFile(fileId))return "error";
+        if(!fileService.delFile(fileId))return "errorPage";
         attributes.addAttribute("userId",uid);
         attributes.addAttribute("curPage",curPage);
         attributes.addAttribute("fileName",fileName);
         return "redirect:/manager/subFile";
     }
 
-    @RequestMapping("/changeFileValid")
+    @PatchMapping("/changeFileValid")
+    @ApiOperation("改变文件合法属性->false的话普通用户无法获取文件")
     public String changeFileValid(int fileId, int isValidFile, int uid, RedirectAttributes attributes){
         fileService.changeFileValid(fileId,isValidFile);
         attributes.addAttribute("userId",uid);
@@ -78,7 +83,8 @@ public class ManagerController {
 
     private static final int PAGE_SIZE=5;
 
-    @RequestMapping("/subFile")
+    @GetMapping("/subFile")
+    @ApiOperation("根据信息查看当前文件夹下所有文件")
     public ModelAndView subFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                 @RequestParam("userId") int userId,
                                 @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
@@ -94,7 +100,8 @@ public class ManagerController {
         return modelAndView;
     }
 
-    @RequestMapping("/parentFile")
+    @GetMapping("/parentFile")
+    @ApiOperation("返回上一级")
     public String parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                              @RequestParam("userId") int userId,
                              RedirectAttributes attributes){
@@ -104,7 +111,8 @@ public class ManagerController {
         return "redirect:/manager/subFile";
     }
 
-    @RequestMapping("/exit")
+    @GetMapping("/exit")
+    @ApiOperation("管理用户退出")
     public String exit(HttpServletRequest request){
         request.getSession().invalidate();
         return "managerLogin";
