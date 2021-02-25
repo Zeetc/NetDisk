@@ -1,14 +1,12 @@
 package com.catchiz.controller;
 
-import com.catchiz.domain.MyFile;
-import com.catchiz.domain.User;
+import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -26,96 +24,93 @@ public class ManagerController {
     }
 
     @PostMapping("/login")
+    @ResponseBody
     @ApiOperation("管理用户登录")
-    public String login(User user, HttpSession session){
+    public CommonResult login(User user,
+                              @ApiIgnore HttpSession session){
         User manager=userService.managerLogin(user);
-        if(manager!=null){
-            session.setAttribute("manager",true);
-            session.setAttribute("user",manager);
+        if(manager==null){
+            return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
         }
-        return "redirect:/manager/getAllUser";
+        session.setAttribute("manager",true);
+        session.setAttribute("user",manager);
+        return getAllUser();
     }
 
     @GetMapping("/loginUI")
     @ApiOperation("跳转到管理登录页面")
-    public String loginUI(HttpSession session){
+    public String loginUI(@ApiIgnore HttpSession session){
         if(session.getAttribute("manager")!=null)return "redirect:/manager/getAllUser";
         return "managerLogin";
     }
 
     @GetMapping("/getAllUser")
+    @ResponseBody
     @ApiOperation("获取所有用户")
-    public ModelAndView getAllUser(){
+    public CommonResult getAllUser(){
         List<User> userList=userService.getAllUser();
-        ModelAndView modelAndView=new ModelAndView();
-        modelAndView.setViewName("managerPage");
-        modelAndView.addObject("userList",userList);
-        return modelAndView;
+        return new CommonResult(CommonStatus.OK,"查询成功",userList);
     }
 
     @DeleteMapping("/delUser/{userId}")
+    @ResponseBody
     @ApiOperation("删除用户")
-    public String delUser(@PathVariable("userId") int userId){
+    public CommonResult delUser(@PathVariable("userId") int userId){
         userService.delUser(userId);
-        return "redirect:/manager/getAllUser";
+        return getAllUser();
     }
 
     @DeleteMapping("/delFile")
+    @ResponseBody
     @ApiOperation("删除文件")
-    public String delFile(int fileId,int uid,
+    public CommonResult delFile(int fileId,int uid,
                           @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
-                          @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
-                          RedirectAttributes attributes){
-        if(!fileService.delFile(fileId))return "errorPage";
-        attributes.addAttribute("userId",uid);
-        attributes.addAttribute("curPage",curPage);
-        attributes.addAttribute("fileName",fileName);
-        return "redirect:/manager/subFile";
+                          @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName){
+        if(!fileService.delFile(fileId))return new CommonResult(CommonStatus.EXCEPTION,"删除失败");
+        return subFile(fileService.getCurPid(fileId),uid,curPage,fileName);
     }
 
     @PatchMapping("/changeFileValid")
+    @ResponseBody
     @ApiOperation("改变文件合法属性->false的话普通用户无法获取文件")
-    public String changeFileValid(int fileId, int isValidFile, int uid, RedirectAttributes attributes){
+    public CommonResult changeFileValid(int fileId, int isValidFile, int uid){
         fileService.changeFileValid(fileId,isValidFile);
-        attributes.addAttribute("userId",uid);
-        return "redirect:/manager/subFile";
+        return subFile(fileService.getCurPid(fileId),uid,0,null);
     }
 
     private static final int PAGE_SIZE=5;
 
     @GetMapping("/subFile")
+    @ResponseBody
     @ApiOperation("根据信息查看当前文件夹下所有文件")
-    public ModelAndView subFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
+    public CommonResult subFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                 @RequestParam("userId") int userId,
                                 @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                                 @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName){
-        ModelAndView modelAndView=new ModelAndView();
+        if(fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
         List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,true);
-        modelAndView.addObject("myFileList",myFileList);
-        modelAndView.addObject("pid",pid);
-        modelAndView.setViewName("userFiles");
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
-        FileController.packModelInfo(curPage, fileName, modelAndView, totalCount, PAGE_SIZE);
-        modelAndView.addObject("userId",userId);
-        return modelAndView;
+        int curPid=(pid==-1?-1:fileService.getCurPid(pid));
+        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount/ PAGE_SIZE : (totalCount/ PAGE_SIZE) + 1 ;
+        if(totalPage==0)totalPage = 1;
+        return new CommonResult(CommonStatus.OK,"查询成功",myFileList,new PageBean(curPid,totalPage,curPage,fileName,userId));
     }
 
     @GetMapping("/parentFile")
+    @ResponseBody
     @ApiOperation("返回上一级")
-    public String parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
-                             @RequestParam("userId") int userId,
-                             RedirectAttributes attributes){
+    public CommonResult parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
+                             @RequestParam("userId") int userId){
         int curPid=(pid==-1?-1:fileService.getCurPid(pid));
-        attributes.addAttribute("pid",curPid);
-        attributes.addAttribute("userId",userId);
-        return "redirect:/manager/subFile";
+        return subFile(curPid,userId,0,null);
     }
 
     @GetMapping("/exit")
+    @ResponseBody
     @ApiOperation("管理用户退出")
-    public String exit(HttpServletRequest request){
+    public CommonResult exit(@ApiIgnore HttpServletRequest request){
         request.getSession().invalidate();
-        return "managerLogin";
+        return new CommonResult(CommonStatus.OK,"退出成功");
     }
 
 }

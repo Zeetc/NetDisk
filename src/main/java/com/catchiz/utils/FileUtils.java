@@ -21,7 +21,7 @@ public class FileUtils {
         MyFile file=new MyFile();
         file.setFilename(foldName);
         file.setFilePath(path);
-        file.setFileSize(0);
+        file.setFileSize(0L);
         file.setIsValidFile(1);
         file.setUploadDate(new Timestamp(System.currentTimeMillis()));
         file.setUid(uid);

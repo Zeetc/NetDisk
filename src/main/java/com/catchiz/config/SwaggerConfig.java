@@ -18,6 +18,7 @@ public class SwaggerConfig {
     public Docket docket() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enable(true)
                 .select()// 通过.select()方法，去配置扫描接口,RequestHandlerSelectors配置如何扫描接口
                 .apis(RequestHandlerSelectors.basePackage("com.catchiz.controller"))
                 .build();

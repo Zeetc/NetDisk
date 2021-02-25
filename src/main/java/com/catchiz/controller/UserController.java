@@ -1,6 +1,8 @@
 package com.catchiz.controller;
 
 
+import com.catchiz.domain.CommonResult;
+import com.catchiz.domain.CommonStatus;
 import com.catchiz.domain.User;
 import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
@@ -10,7 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -27,40 +30,43 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @ResponseBody
     @ApiOperation("用户注册")
-    public ModelAndView register(User user,HttpSession session) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
-        ModelAndView modelAndView=new ModelAndView();
+    public CommonResult register(User user,
+                                 @ApiIgnore HttpSession session) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
         int userId=userService.register(user);
         if(userId!=-1) {
-            modelAndView.addObject("userId", userId);
+            session.setAttribute("user",user);
+            return new CommonResult(CommonStatus.CREATE,"注册成功",userId);
         }else {
-            modelAndView.addObject("registerFail",true);
+            return new CommonResult(CommonStatus.EXCEPTION,"注册失败");
         }
-        modelAndView.setViewName("registerInfo");
-        session.setAttribute("user",user);
-        return modelAndView;
     }
 
     @GetMapping("/loginUI")
     @ApiOperation("跳转到普通用户登录界面")
-    public String loginUi(HttpSession session){
+    public String loginUi(@ApiIgnore HttpSession session){
         if(session.getAttribute("user")!=null)return "redirect:/file/subFile";
         return "login";
     }
 
     @PostMapping("/login")
+    @ResponseBody
     @ApiOperation("普通用户登录")
-    public String login(User user, HttpSession session) throws EmptyResultDataAccessException{
+    public CommonResult login(User user,
+                              @ApiIgnore HttpSession session) throws EmptyResultDataAccessException{
         User u=userService.login(user);
-        if(user!=null)session.setAttribute("user",u);
-        return "redirect:/file/subFile";
+        if(user==null)return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
+        session.setAttribute("user",u);
+        return new CommonResult(CommonStatus.OK,"登录成功");
     }
 
     @GetMapping("/exit")
+    @ResponseBody
     @ApiOperation("普通用户退出")
-    public String exit(HttpServletRequest request){
+    public CommonResult exit(@ApiIgnore HttpServletRequest request){
         request.getSession().invalidate();
-        return "login";
+        return new CommonResult(CommonStatus.OK,"退出成功");
     }
 
 }
