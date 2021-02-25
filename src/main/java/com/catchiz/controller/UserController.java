@@ -56,7 +56,7 @@ public class UserController {
     public CommonResult login(User user,
                               @ApiIgnore HttpSession session) throws EmptyResultDataAccessException{
         User u=userService.login(user);
-        if(user==null)return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
+        if(u==null)return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
         session.setAttribute("user",u);
         return new CommonResult(CommonStatus.OK,"登录成功");
     }
