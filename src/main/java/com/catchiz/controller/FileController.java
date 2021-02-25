@@ -41,7 +41,7 @@ public class FileController {
                 return new CommonResult(CommonStatus.EXCEPTION,"上传文件失败");
             }
         }
-        return subFile(pid,0,null,session);
+        return subFile(pid,1,null,session);
     }
 
     @GetMapping("/download")
@@ -70,7 +70,7 @@ public class FileController {
                                 @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                                 @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
                                 @ApiIgnore HttpSession session){
-        if(fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
+        if(pid!=-1&&fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
         User user= (User) session.getAttribute("user");
         List<MyFile> myFileList=fileService.findByInfo(pid,user.getId(),curPage,PAGE_SIZE,fileName,false);
         int totalCount=fileService.findCountByInfo(pid,user.getId(),fileName,false);
@@ -97,7 +97,7 @@ public class FileController {
         User user=(User)session.getAttribute("user");
         boolean flag=true;
         if(!foldName.equals(""))flag=fileService.createFolder(foldName,user.getId(),pid);
-        if(flag)return subFile(pid,0,null,session);
+        if(flag)return subFile(pid,1,null,session);
         return new CommonResult(CommonStatus.FORBIDDEN,"添加文件夹失败");
     }
 
