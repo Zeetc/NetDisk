@@ -37,7 +37,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int register(User user) throws DataIntegrityViolationException, SQLIntegrityConstraintViolationException {
+        user.setId(null);
         user.setRegisterDate(new Timestamp(System.currentTimeMillis()));
+        user.setIsManager(0);
         userMapper.register(user);
         int userId=user.getId();
         File file=new File(FileController.fileStorePath+"\\"+userId);

@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 @Data
 public class User {
-    @ApiModelProperty(required = true,hidden = true)
+    @ApiModelProperty(hidden = true)
     private Integer id;
 
     private String username;

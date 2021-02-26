@@ -34,6 +34,12 @@ public class UserController {
     @ApiOperation("用户注册")
     public CommonResult register(User user,
                                  @ApiIgnore HttpSession session) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
+        if(user.getUsername()==null||user.getPassword()==null||user.getEmail()==null||
+            user.getUsername().trim().length()<1||
+            user.getPassword().trim().length()<1||
+            user.getEmail().trim().length()<1){
+            return new CommonResult(CommonStatus.FORBIDDEN,"账户输入不合法");
+        }
         int userId=userService.register(user);
         if(userId!=-1) {
             session.setAttribute("user",user);
