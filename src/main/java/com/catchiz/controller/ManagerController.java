@@ -33,7 +33,7 @@ public class ManagerController {
         }
         Map<String,Object> map=new HashMap<>();
         map.put("manager",true);
-        map.put("user",manager);
+        map.put("userId",manager.getId());
         return new CommonResult(CommonStatus.OK,"登录成功", JwtUtils.generate(map));
     }
 

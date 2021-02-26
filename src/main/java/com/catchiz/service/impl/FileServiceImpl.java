@@ -83,10 +83,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public boolean storeFilePrepare(MultipartFile multipartFile, User user,int pid) throws IOException {
+    public boolean storeFilePrepare(MultipartFile multipartFile, int userId,int pid) throws IOException {
         String filename= multipartFile.getOriginalFilename();
         if(filename==null)return false;
-        String prePath=(pid==-1?FileController.fileStorePath+"/"+user.getId():getFilePathById(pid));
+        String prePath=(pid==-1?FileController.fileStorePath+"/"+userId:getFilePathById(pid));
         String[] dirs=filename.split("/");
         int dynamicPid=pid;
         for (int i = 0; i < dirs.length - 1; i++) {
@@ -97,7 +97,7 @@ public class FileServiceImpl implements FileService {
                 File temp=new File(prePath);
                 if(!temp.mkdir())return false;
                 //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
-                dynamicConstructMyFile(myFile,dirs[i],prePath,0,1,null, user.getId(), dynamicPid);
+                dynamicConstructMyFile(myFile,dirs[i],prePath,0,1,null, userId, dynamicPid);
                 storeFile(myFile);
             }
             dynamicPid=myFile.getFileId();
@@ -107,7 +107,7 @@ public class FileServiceImpl implements FileService {
         multipartFile.transferTo(new File(path));
         MyFile file=new MyFile();
         //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
-        dynamicConstructMyFile(file,dirs[dirs.length-1],path, multipartFile.getSize(), 1,multipartFile.getContentType(), user.getId(), dynamicPid);
+        dynamicConstructMyFile(file,dirs[dirs.length-1],path, multipartFile.getSize(), 1,multipartFile.getContentType(), userId, dynamicPid);
         storeFile(file);
         return true;
     }

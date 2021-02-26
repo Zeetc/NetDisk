@@ -1,6 +1,7 @@
 package com.catchiz.utils;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -14,10 +15,13 @@ public class JwtUtils {
 
     public static String generate(Map<String, Object> claims) {
         Date nowDate = new Date();
+        JwtBuilder builder = Jwts.builder();
+        for (Map.Entry<String, Object> entry : claims.entrySet()) {
+            builder.claim(entry.getKey(),entry.getValue());
+        }
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + EXPIRE);
-        return Jwts.builder()
-                .setClaims(claims)
+        return builder
                 .setIssuedAt(nowDate)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS512, SECRET)
@@ -31,7 +35,7 @@ public class JwtUtils {
                 .getBody();
     }
 
-    public static String refreshToken(Claims claim) {
+    private String refreshToken(Claims claim) {
         Date nowDate = new Date();
         Date expiration = claim.getExpiration();
         //如果还有有效时间的话，刷新token

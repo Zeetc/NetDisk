@@ -1,7 +1,6 @@
 package com.catchiz.service;
 
 import com.catchiz.domain.MyFile;
-import com.catchiz.domain.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -29,5 +28,5 @@ public interface FileService {
 
     MyFile getFileByPath(String filePath);
 
-    boolean storeFilePrepare(MultipartFile multipartFile, User user, int pid) throws IOException;
+    boolean storeFilePrepare(MultipartFile multipartFile, int userId, int pid) throws IOException;
 }

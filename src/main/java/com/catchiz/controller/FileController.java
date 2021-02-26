@@ -32,10 +32,10 @@ public class FileController {
     public CommonResult uploadFile(MultipartFile[] uploadFile,
                              @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
                              @RequestHeader String Authorization) throws IOException {
-        User user= (User) JwtUtils.getClaim(Authorization).get("user");
+        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
         for (MultipartFile multipartFile : uploadFile) {
             if(multipartFile.isEmpty())continue;
-            if(!fileService.storeFilePrepare(multipartFile,user,pid)){
+            if(!fileService.storeFilePrepare(multipartFile,userId,pid)){
                 return new CommonResult(CommonStatus.EXCEPTION,"上传文件失败");
             }
         }
@@ -48,8 +48,8 @@ public class FileController {
                                  @ApiIgnore HttpServletResponse response,
                                  @RequestHeader String Authorization) throws IOException {
         MyFile file=fileService.getFileById(fileId);
-        User user= (User) JwtUtils.getClaim(Authorization).get("user");
-        if(!user.getId().equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无下载权限");
+        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        if(!userId.equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无下载权限");
         FileInputStream fis=new FileInputStream(file.getFilePath());
         response.setHeader("content-type",file.getContentType());
         response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
@@ -71,12 +71,12 @@ public class FileController {
                                 @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
                                 @RequestHeader String Authorization){
         if(pid!=-1&&fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
-        User user= (User) JwtUtils.getClaim(Authorization).get("user");
-        List<MyFile> myFileList=fileService.findByInfo(pid,user.getId(),curPage,PAGE_SIZE,fileName,false);
-        int totalCount=fileService.findCountByInfo(pid,user.getId(),fileName,false);
+        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,false);
+        int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
         int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount/ PAGE_SIZE : (totalCount/ PAGE_SIZE) + 1 ;
         if(totalPage==0)totalPage = 1;
-        return new CommonResult(CommonStatus.OK,"查询成功",myFileList, new PageBean(pid,totalPage,curPage,fileName,user.getId()));
+        return new CommonResult(CommonStatus.OK,"查询成功",myFileList, new PageBean(pid,totalPage,curPage,fileName,userId));
     }
 
     @GetMapping("/parentFile")
@@ -91,9 +91,9 @@ public class FileController {
     public CommonResult addFolder(@RequestParam("foldName") String foldName,
                                   @RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                   @RequestHeader String Authorization) throws IOException {
-        User user= (User) JwtUtils.getClaim(Authorization).get("user");
+        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
         boolean flag=true;
-        if(!foldName.equals(""))flag=fileService.createFolder(foldName,user.getId(),pid);
+        if(!foldName.equals(""))flag=fileService.createFolder(foldName,userId,pid);
         if(flag)return new CommonResult(CommonStatus.OK,"添加文件夹成功");
         return new CommonResult(CommonStatus.FORBIDDEN,"添加文件夹失败");
     }
@@ -102,9 +102,9 @@ public class FileController {
     @ApiOperation("删除文件")
     public CommonResult delFile(int fileId,
                                 @RequestHeader String Authorization){
-        User user= (User) JwtUtils.getClaim(Authorization).get("user");
+        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
         MyFile file=fileService.getFileById(fileId);
-        if(!user.getId().equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+        if(!userId.equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         fileService.delFile(fileId);
         return new CommonResult(CommonStatus.OK,"删除成功");
     }

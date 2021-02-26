@@ -50,7 +50,7 @@ public class UserController {
         User u=userService.login(user);
         if(u==null)return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
         Map<String, Object> map = new HashMap<>();
-        map.put("user", u);
+        map.put("userId", u.getId());
         return new CommonResult(CommonStatus.OK,"登录成功", JwtUtils.generate(map));
     }
 

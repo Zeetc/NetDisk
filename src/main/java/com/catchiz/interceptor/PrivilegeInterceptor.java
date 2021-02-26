@@ -8,6 +8,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 @Component
 public class PrivilegeInterceptor implements HandlerInterceptor {
@@ -18,10 +19,10 @@ public class PrivilegeInterceptor implements HandlerInterceptor {
         try {
             claim = JwtUtils.getClaim(token);
         }catch (Exception e){
+            response.sendRedirect(request.getContextPath()+"/pages/login.jsp");
             return false;
         }
-        User user=(User) claim.get("user");
-        if(user==null){
+        if(claim.get("userId")==null){
             response.sendRedirect(request.getContextPath()+"/pages/login.jsp");
             return false;
         }

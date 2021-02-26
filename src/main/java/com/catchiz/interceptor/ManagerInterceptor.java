@@ -17,6 +17,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
         try {
             claim = JwtUtils.getClaim(token);
         }catch (Exception e){
+            response.sendRedirect(request.getContextPath()+"/pages/managerLogin.jsp");
             return false;
         }
         Boolean isManager= (Boolean) claim.get("manager");
