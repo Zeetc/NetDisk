@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JwtUtils {
@@ -28,6 +29,20 @@ public class JwtUtils {
                 .setSigningKey(SECRET)
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public static String refreshToken(Claims claim) {
+        Date nowDate = new Date();
+        Date expiration = claim.getExpiration();
+        //如果还有有效时间的话，刷新token
+        if ((expiration.getTime() - nowDate.getTime()) >= 0) {
+            //要刷新token
+            Object user = claim.get("user");
+            Map<String, Object> map = new HashMap<>();
+            map.put("user", user);
+            return JwtUtils.generate(map);
+        }
+        return null;
     }
 
 }
