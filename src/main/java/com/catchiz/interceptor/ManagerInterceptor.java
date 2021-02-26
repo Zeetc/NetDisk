@@ -1,18 +1,25 @@
 package com.catchiz.interceptor;
 
+import com.catchiz.utils.JwtUtils;
+import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @Component
 public class ManagerInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        HttpSession session=request.getSession();
-        Boolean isManager= (Boolean) session.getAttribute("manager");
+        String token = request.getHeader("Authorization");
+        Claims claim;
+        try {
+            claim = JwtUtils.getClaim(token);
+        }catch (Exception e){
+            return false;
+        }
+        Boolean isManager= (Boolean) claim.get("manager");
         if(isManager==null||!isManager){
             response.sendRedirect(request.getContextPath()+"/pages/managerLogin.jsp");
             return false;

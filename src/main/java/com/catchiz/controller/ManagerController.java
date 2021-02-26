@@ -3,13 +3,15 @@ package com.catchiz.controller;
 import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
+import com.catchiz.utils.JwtUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/manager")
@@ -24,15 +26,15 @@ public class ManagerController {
 
     @PostMapping("/login")
     @ApiOperation("管理用户登录")
-    public CommonResult login(User user,
-                              @ApiIgnore HttpSession session){
+    public CommonResult login(User user){
         User manager=userService.managerLogin(user);
         if(manager==null){
             return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
         }
-        session.setAttribute("manager",true);
-        session.setAttribute("user",manager);
-        return new CommonResult(CommonStatus.OK,"登录成功");
+        Map<String,Object> map=new HashMap<>();
+        map.put("manager",true);
+        map.put("user",manager);
+        return new CommonResult(CommonStatus.OK,"登录成功", JwtUtils.generate(map));
     }
 
     @GetMapping("/getAllUser")
@@ -51,9 +53,7 @@ public class ManagerController {
 
     @DeleteMapping("/delFile")
     @ApiOperation("删除文件")
-    public CommonResult delFile(int fileId,int uid,
-                          @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
-                          @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName){
+    public CommonResult delFile(int fileId){
         if(!fileService.delFile(fileId))return new CommonResult(CommonStatus.EXCEPTION,"删除失败");
         return new CommonResult(CommonStatus.OK,"删除成功");
     }
