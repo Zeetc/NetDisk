@@ -12,7 +12,7 @@ public interface UserService {
 
     User login(User user);
 
-    void delUser(int userId);
+    boolean delUser(int userId);
 
     User managerLogin(User user);
 }

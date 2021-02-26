@@ -4,7 +4,6 @@ import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/manager")
 public class ManagerController {
     private final UserService userService;
@@ -24,7 +23,6 @@ public class ManagerController {
     }
 
     @PostMapping("/login")
-    @ResponseBody
     @ApiOperation("管理用户登录")
     public CommonResult login(User user,
                               @ApiIgnore HttpSession session){
@@ -34,18 +32,10 @@ public class ManagerController {
         }
         session.setAttribute("manager",true);
         session.setAttribute("user",manager);
-        return getAllUser();
-    }
-
-    @GetMapping("/loginUI")
-    @ApiOperation("跳转到管理登录页面")
-    public String loginUI(@ApiIgnore HttpSession session){
-        if(session.getAttribute("manager")!=null)return "redirect:/manager/getAllUser";
-        return "managerLogin";
+        return new CommonResult(CommonStatus.OK,"登录成功");
     }
 
     @GetMapping("/getAllUser")
-    @ResponseBody
     @ApiOperation("获取所有用户")
     public CommonResult getAllUser(){
         List<User> userList=userService.getAllUser();
@@ -53,35 +43,31 @@ public class ManagerController {
     }
 
     @DeleteMapping("/delUser/{userId}")
-    @ResponseBody
     @ApiOperation("删除用户")
     public CommonResult delUser(@PathVariable("userId") int userId){
-        userService.delUser(userId);
-        return getAllUser();
+        if(!userService.delUser(userId))return new CommonResult(CommonStatus.FORBIDDEN,"删除失败");
+        return new CommonResult(CommonStatus.OK,"删除成功");
     }
 
     @DeleteMapping("/delFile")
-    @ResponseBody
     @ApiOperation("删除文件")
     public CommonResult delFile(int fileId,int uid,
                           @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                           @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName){
         if(!fileService.delFile(fileId))return new CommonResult(CommonStatus.EXCEPTION,"删除失败");
-        return subFile(fileService.getCurPid(fileId),uid,curPage,fileName);
+        return new CommonResult(CommonStatus.OK,"删除成功");
     }
 
     @PatchMapping("/changeFileValid")
-    @ResponseBody
     @ApiOperation("改变文件合法属性->false的话普通用户无法获取文件")
-    public CommonResult changeFileValid(int fileId, int isValidFile, int uid){
+    public CommonResult changeFileValid(int fileId, int isValidFile){
         fileService.changeFileValid(fileId,isValidFile);
-        return subFile(fileService.getCurPid(fileId),uid,0,null);
+        return new CommonResult(CommonStatus.OK,"修改文件属性成功");
     }
 
     private static final int PAGE_SIZE=5;
 
     @GetMapping("/subFile")
-    @ResponseBody
     @ApiOperation("根据信息查看当前文件夹下所有文件")
     public CommonResult subFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                 @RequestParam("userId") int userId,
@@ -97,16 +83,13 @@ public class ManagerController {
     }
 
     @GetMapping("/parentFile")
-    @ResponseBody
-    @ApiOperation("返回上一级")
-    public CommonResult parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
-                             @RequestParam("userId") int userId){
+    @ApiOperation("查询父文件ID，可以根据父文件ID返回文件上一级目录")
+    public CommonResult parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid){
         int curPid=(pid==-1?-1:fileService.getCurPid(pid));
-        return subFile(curPid,userId,0,null);
+        return new CommonResult(CommonStatus.OK,"查询父文件ID成功",curPid);
     }
 
     @GetMapping("/exit")
-    @ResponseBody
     @ApiOperation("管理用户退出")
     public CommonResult exit(@ApiIgnore HttpServletRequest request){
         request.getSession().invalidate();

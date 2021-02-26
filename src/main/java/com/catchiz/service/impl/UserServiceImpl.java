@@ -56,12 +56,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delUser(int userId) {
+    public boolean delUser(int userId) {
         User user=userMapper.getUserById(userId);
-        if(user.getIsManager()==1)return;
+        if(user.getIsManager()==1)return false;
         fileMapper.delFileByUser(userId);
         userMapper.delUser(userId);
-        fileUtils.delFile(FileController.fileStorePath+"\\"+userId);
+        return fileUtils.delFile(FileController.fileStorePath+"\\"+userId);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.catchiz.controller;
 import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
@@ -15,7 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/file")
 public class FileController {
 
@@ -29,7 +28,6 @@ public class FileController {
     }
 
     @PostMapping("/upload")
-    @ResponseBody
     @ApiOperation("用户上传文件")
     public CommonResult uploadFile(MultipartFile[] uploadFile,
                              @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
@@ -41,17 +39,17 @@ public class FileController {
                 return new CommonResult(CommonStatus.EXCEPTION,"上传文件失败");
             }
         }
-        return subFile(pid,1,null,session);
+        return new CommonResult(CommonStatus.OK,"上传文件成功");
     }
 
     @GetMapping("/download")
     @ApiOperation("用户下载文件")
-    public void download(@RequestParam("fileId") int fileId,
+    public CommonResult download(@RequestParam("fileId") int fileId,
                          @ApiIgnore HttpServletResponse response,
                          @ApiIgnore HttpSession session) throws IOException {
         MyFile file=fileService.getFileById(fileId);
         User user=(User)session.getAttribute("user");
-        if(!user.getId().equals(file.getUid()))return;
+        if(!user.getId().equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无下载权限");
         FileInputStream fis=new FileInputStream(file.getFilePath());
         response.setHeader("content-type",file.getContentType());
         response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
@@ -61,10 +59,10 @@ public class FileController {
         while ((len=fis.read(buff)) != -1){
             sos.write(buff,0,len);
         }
+        return new CommonResult(CommonStatus.OK,"下载成功");
     }
 
     @GetMapping("/subFile")
-    @ResponseBody
     @ApiOperation("根据信息查看当前文件夹下所有文件")
     public CommonResult subFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                 @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
@@ -80,16 +78,13 @@ public class FileController {
     }
 
     @GetMapping("/parentFile")
-    @ResponseBody
     @ApiOperation("返回上一级")
-    public CommonResult parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
-                             @ApiIgnore HttpSession session){
+    public CommonResult parentFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid){
         int curPid=(pid==-1?-1:fileService.getCurPid(pid));
-        return subFile(curPid,1,null,session);
+        return new CommonResult(CommonStatus.OK,"查询成功",curPid);
     }
 
     @PostMapping("/addFolder")
-    @ResponseBody
     @ApiOperation("在该目录下添加文件夹")
     public CommonResult addFolder(@RequestParam("foldName") String foldName,
                             @RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
@@ -97,21 +92,18 @@ public class FileController {
         User user=(User)session.getAttribute("user");
         boolean flag=true;
         if(!foldName.equals(""))flag=fileService.createFolder(foldName,user.getId(),pid);
-        if(flag)return subFile(pid,1,null,session);
+        if(flag)return new CommonResult(CommonStatus.OK,"添加文件夹成功");
         return new CommonResult(CommonStatus.FORBIDDEN,"添加文件夹失败");
     }
 
     @DeleteMapping("/delFile")
-    @ResponseBody
     @ApiOperation("删除文件")
     public CommonResult delFile(int fileId,
-                          @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
-                          @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
                           @ApiIgnore HttpSession session){
         User user= (User) session.getAttribute("user");
         MyFile file=fileService.getFileById(fileId);
         if(!user.getId().equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         fileService.delFile(fileId);
-        return subFile(file.getPid(),curPage,fileName,session);
+        return new CommonResult(CommonStatus.OK,"删除成功");
     }
 }

@@ -6,5 +6,4 @@ public class CommonStatus {
     public static int FORBIDDEN=403;
     public static int CREATE=201;
     public static int NOTFOUND=404;
-
 }
