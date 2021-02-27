@@ -4,6 +4,7 @@ import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.JwtUtils;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
@@ -18,8 +19,8 @@ import java.util.List;
 @RequestMapping("/file")
 public class FileController {
 
-    public static final String fileStorePath="F:/Cui/fileStore";
-    private static final int PAGE_SIZE=5;
+    public static String FILE_STORE_PATH;
+    private static int PAGE_SIZE;
 
     private final FileService fileService;
 
@@ -27,16 +28,26 @@ public class FileController {
         this.fileService = fileService;
     }
 
+    @Value("${NetDisk.fileStorePath}")
+    public void setFileStorePath(String fileStorePath) {
+        FileController.FILE_STORE_PATH = fileStorePath;
+    }
+    @Value("${NetDisk.pageSize}")
+    public void setPageSize(int pageSize){
+        FileController.PAGE_SIZE = pageSize;
+    }
+
     @PostMapping("/upload")
-    @ApiOperation("用户上传文件")
+    @ApiOperation("用户上传文件/文件夹")
     public CommonResult uploadFile(MultipartFile[] uploadFile,
                              @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
                              @RequestHeader String Authorization) throws IOException {
         Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        if(uploadFile==null) return new CommonResult(CommonStatus.FORBIDDEN,"文件上传不能为空");
         for (MultipartFile multipartFile : uploadFile) {
-            if(multipartFile.isEmpty())continue;
-            if(!fileService.storeFilePrepare(multipartFile,userId,pid)){
-                return new CommonResult(CommonStatus.EXCEPTION,"上传文件失败");
+            if (multipartFile == null || multipartFile.isEmpty()) continue;
+            if (!fileService.storeFilePrepare(multipartFile, userId, pid)) {
+                return new CommonResult(CommonStatus.EXCEPTION, "上传文件失败");
             }
         }
         return new CommonResult(CommonStatus.OK,"上传文件成功");
@@ -87,14 +98,14 @@ public class FileController {
     }
 
     @PostMapping("/addFolder")
-    @ApiOperation("在该目录下添加文件夹")
+    @ApiOperation("在当前目录下新建文件夹")
     public CommonResult addFolder(@RequestParam("foldName") String foldName,
                                   @RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                   @RequestHeader String Authorization) throws IOException {
         Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
-        boolean flag=true;
-        if(!foldName.equals(""))flag=fileService.createFolder(foldName,userId,pid);
-        if(flag)return new CommonResult(CommonStatus.OK,"添加文件夹成功");
+        if(!foldName.equals("")&&fileService.createFolder(foldName,userId,pid)){
+            return new CommonResult(CommonStatus.OK,"添加文件夹成功");
+        }
         return new CommonResult(CommonStatus.FORBIDDEN,"添加文件夹失败");
     }
 

@@ -2,7 +2,6 @@ package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
 import com.catchiz.domain.MyFile;
-import com.catchiz.domain.User;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.FileUtils;
@@ -56,7 +55,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public boolean createFolder(String foldName, int uid,int pid) {
-        String prePath=(pid==-1?FileController.fileStorePath+"/"+uid:fileMapper.getPathById(pid));
+        String prePath=(pid==-1?FileController.FILE_STORE_PATH +"/"+uid:fileMapper.getPathById(pid));
         String path=prePath+"/"+foldName;
         return fileUtils.createDir(foldName,path,uid,pid);
     }
@@ -86,7 +85,7 @@ public class FileServiceImpl implements FileService {
     public boolean storeFilePrepare(MultipartFile multipartFile, int userId,int pid) throws IOException {
         String filename= multipartFile.getOriginalFilename();
         if(filename==null)return false;
-        String prePath=(pid==-1?FileController.fileStorePath+"/"+userId:getFilePathById(pid));
+        String prePath=(pid==-1?FileController.FILE_STORE_PATH +"/"+userId:getFilePathById(pid));
         String[] dirs=filename.split("/");
         int dynamicPid=pid;
         for (int i = 0; i < dirs.length - 1; i++) {

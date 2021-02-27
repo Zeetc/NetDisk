@@ -1,10 +1,7 @@
 package com.catchiz.mapper;
 
 import com.catchiz.domain.User;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -30,4 +27,10 @@ public interface UserMapper {
 
     @Select("select * from user where id = #{id}")
     User getUserById(int userId);
+
+    @Update("update user set password = '#{password}' where id = #{id}")
+    void resetPassword(@Param("id") Integer id,@Param("password") String password);
+
+    @Select("select count(*) from user where email = #{email}")
+    Integer getEmailCount(@Param("email") String email);
 }

@@ -15,4 +15,8 @@ public interface UserService {
     boolean delUser(int userId);
 
     User managerLogin(User user);
+
+    boolean resetPassword(Integer userId,String password);
+
+    boolean checkEmailExist(String email);
 }

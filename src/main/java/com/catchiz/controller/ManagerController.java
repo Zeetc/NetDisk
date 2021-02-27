@@ -5,6 +5,7 @@ import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
 import com.catchiz.utils.JwtUtils;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -19,9 +20,16 @@ public class ManagerController {
     private final UserService userService;
     private final FileService fileService;
 
+    private static int PAGE_SIZE;
+
     public ManagerController(UserService userService, FileService fileService) {
         this.userService = userService;
         this.fileService = fileService;
+    }
+
+    @Value("${NetDisk.pageSize}")
+    public void setPageSize(int pageSize){
+        ManagerController.PAGE_SIZE = pageSize;
     }
 
     @PostMapping("/login")
@@ -64,8 +72,6 @@ public class ManagerController {
         fileService.changeFileValid(fileId,isValidFile);
         return new CommonResult(CommonStatus.OK,"修改文件属性成功");
     }
-
-    private static final int PAGE_SIZE=5;
 
     @GetMapping("/subFile")
     @ApiOperation("根据信息查看当前文件夹下所有文件")

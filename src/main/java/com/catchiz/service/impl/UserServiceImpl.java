@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
         user.setIsManager(0);
         userMapper.register(user);
         int userId=user.getId();
-        File file=new File(FileController.fileStorePath+"\\"+userId);
+        File file=new File(FileController.FILE_STORE_PATH +"\\"+userId);
         if(file.mkdir()){
             return userId;
         }
@@ -61,11 +61,24 @@ public class UserServiceImpl implements UserService {
         if(user.getIsManager()==1)return false;
         fileMapper.delFileByUser(userId);
         userMapper.delUser(userId);
-        return fileUtils.delFile(FileController.fileStorePath+"\\"+userId);
+        return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId);
     }
 
     @Override
     public User managerLogin(User user) {
         return userMapper.managerLogin(user);
+    }
+
+    @Override
+    public boolean resetPassword(Integer userId, String password) {
+        if(userId==null)return false;
+        userMapper.resetPassword(userId, password);
+        return true;
+    }
+
+    @Override
+    public boolean checkEmailExist(String email) {
+        Integer emailCount= userMapper.getEmailCount(email);
+        return emailCount!=null&&emailCount!=0;
     }
 }

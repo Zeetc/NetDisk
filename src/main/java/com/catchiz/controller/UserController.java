@@ -36,6 +36,9 @@ public class UserController {
             user.getEmail().trim().length()<1){
             return new CommonResult(CommonStatus.FORBIDDEN,"账号输入不合法");
         }
+        if(userService.checkEmailExist(user.getEmail())){
+            return new CommonResult(CommonStatus.FORBIDDEN,"邮箱已存在");
+        }
         int userId=userService.register(user);
         if(userId!=-1) {
             return new CommonResult(CommonStatus.CREATE,"注册成功",userId);
@@ -59,6 +62,23 @@ public class UserController {
     public CommonResult exit(@ApiIgnore HttpServletRequest request){
         request.getSession().invalidate();
         return new CommonResult(CommonStatus.OK,"退出成功");
+    }
+
+    @PatchMapping("/resetPassword/{password}")
+    @ApiOperation("修改密码")
+    public CommonResult resetPassword(@PathVariable("password")String password,
+                                      @RequestHeader String Authorization){
+        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        if(userService.resetPassword(userId,password)){
+            return new CommonResult(CommonStatus.OK,"修改成功");
+        }
+        return new CommonResult(CommonStatus.FORBIDDEN,"修改失败");
+    }
+
+    @GetMapping("/checkEmailExist/{email}")
+    public CommonResult checkEmailExist(@PathVariable("email")String email){
+        if(userService.checkEmailExist(email))return new CommonResult(CommonStatus.FORBIDDEN,"邮箱已存在");
+        return new CommonResult(CommonStatus.OK,"邮箱合法");
     }
 
 }
