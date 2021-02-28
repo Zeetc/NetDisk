@@ -76,6 +76,7 @@ public class UserController {
     }
 
     @GetMapping("/checkEmailExist/{email}")
+    @ApiOperation("查看邮箱是否存在")
     public CommonResult checkEmailExist(@PathVariable("email")String email){
         if(userService.checkEmailExist(email))return new CommonResult(CommonStatus.FORBIDDEN,"邮箱已存在");
         return new CommonResult(CommonStatus.OK,"邮箱合法");
