@@ -46,12 +46,16 @@ public interface FileMapper {
                     "        <if test=\"!isIgnoreValid\">\n" +
                     "            and isValidFile = 1\n" +
                     "        </if>\n" +
-                    "        limit #{start} , #{pageSize}",
+                    "        <if test=\"pageCut\"> limit #{start} , #{pageSize} </if>",
             "</script>"
     })
-    List<MyFile> findByInfo(@Param("pid") int pid, @Param("userId") int userId,
-                            @Param("start") int start, @Param("pageSize") int pageSize,
-                            @Param("fileName") String fileName, @Param("isIgnoreValid") boolean isIgnoreValid);
+    List<MyFile> findByInfo(@Param("pid") int pid,
+                            @Param("userId") int userId,
+                            @Param("start") int start,
+                            @Param("pageSize") int pageSize,
+                            @Param("fileName") String fileName,
+                            @Param("isIgnoreValid") boolean isIgnoreValid,
+                            @Param("pageCut")boolean pageCut);
 
     @Select({
             "<script>" ,

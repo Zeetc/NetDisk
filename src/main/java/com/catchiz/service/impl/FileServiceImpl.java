@@ -66,9 +66,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<MyFile> findByInfo(int pid,int userId,int curPage,int pageSize,String fileName,boolean isIgnoreValid){
+    public List<MyFile> findByInfo(int pid,int userId,int curPage,int pageSize,String fileName,boolean isIgnoreValid,boolean pageCut){
         int start= (curPage-1)*pageSize;
-        return fileMapper.findByInfo(pid,userId,start,pageSize, "%" + fileName + "%",isIgnoreValid);
+        return fileMapper.findByInfo(pid,userId,start,pageSize, "%" + fileName + "%",isIgnoreValid,pageCut);
     }
 
     @Override

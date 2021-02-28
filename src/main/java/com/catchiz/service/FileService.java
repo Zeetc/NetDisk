@@ -22,7 +22,7 @@ public interface FileService {
 
     String getFilePathById(int id);
 
-    List<MyFile> findByInfo(int pid,int userId,int curPage,int pageSize,String fileName,boolean isIgnoreValid);
+    List<MyFile> findByInfo(int pid,int userId,int curPage,int pageSize,String fileName,boolean isIgnoreValid,boolean pageCut);
 
     int findCountByInfo(int pid, int userId, String fileName, boolean isIgnoreValid);
 

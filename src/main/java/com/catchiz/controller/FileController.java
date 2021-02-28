@@ -80,14 +80,16 @@ public class FileController {
     public CommonResult subFile(@RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                 @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                                 @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
+                                @RequestParam(value = "pageCut", required = false,defaultValue = "true")boolean pageCut,
                                 @RequestHeader String Authorization){
         if(pid!=-1&&fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
         Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
-        List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,false);
+        List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,false,pageCut);
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
-        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount/ PAGE_SIZE : (totalCount/ PAGE_SIZE) + 1 ;
-        if(totalPage==0)totalPage = 1;
-        return new CommonResult(CommonStatus.OK,"查询成功",myFileList, new PageBean(pid,totalPage,curPage,fileName,userId));
+        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount / PAGE_SIZE : (totalCount / PAGE_SIZE) + 1;
+        if (totalPage == 0) totalPage = 1;
+        return new CommonResult(CommonStatus.OK, "查询成功", myFileList, new PageBean(pid, totalPage, curPage, fileName, userId));
+
     }
 
     @GetMapping("/parentFile")
