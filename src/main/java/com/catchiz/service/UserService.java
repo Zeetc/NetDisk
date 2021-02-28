@@ -19,4 +19,6 @@ public interface UserService {
     boolean resetPassword(Integer userId,String password);
 
     boolean checkEmailExist(String email);
+
+    User getUserById(int id);
 }

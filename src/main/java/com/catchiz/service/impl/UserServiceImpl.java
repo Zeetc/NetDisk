@@ -81,4 +81,9 @@ public class UserServiceImpl implements UserService {
         Integer emailCount= userMapper.getEmailCount(email);
         return emailCount!=null&&emailCount!=0;
     }
+
+    @Override
+    public User getUserById(int id) {
+        return userMapper.getUserById(id);
+    }
 }
