@@ -6,6 +6,11 @@
       "description": "网盘的本地储存文件地址."
     },
     {
+      "name": "NetDisk.userIconFolder",
+      "type": "java.lang.String",
+      "description": "储存用户头像的文件夹."
+    },
+    {
       "name": "NetDisk.pageSize",
       "type": "java.lang.Integer",
       "description": "每页显示条数."

@@ -19,4 +19,5 @@ server:
 
 NetDisk:
   fileStorePath: 'F:/Cui/fileStore'
+  userIconFolder: 'UserIcon'
   pageSize: 5

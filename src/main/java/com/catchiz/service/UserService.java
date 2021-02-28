@@ -2,13 +2,14 @@ package com.catchiz.service;
 
 import com.catchiz.domain.User;
 
+import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 public interface UserService {
     List<User> getAllUser();
 
-    int register(User user) throws SQLIntegrityConstraintViolationException;
+    int register(User user) throws SQLIntegrityConstraintViolationException, IOException;
 
     User login(User user);
 

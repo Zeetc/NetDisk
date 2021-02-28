@@ -13,6 +13,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -21,6 +22,7 @@ public class FileController {
 
     public static String FILE_STORE_PATH;
     private static int PAGE_SIZE;
+    public static String USER_ICON_FOLDER;
 
     private final FileService fileService;
 
@@ -35,6 +37,11 @@ public class FileController {
     @Value("${NetDisk.pageSize}")
     public void setPageSize(int pageSize){
         FileController.PAGE_SIZE = pageSize;
+    }
+
+    @Value("${NetDisk.userIconFolder}")
+    public void setUserIconFolder(String iconFolder){
+        FileController.USER_ICON_FOLDER = iconFolder;
     }
 
     @PostMapping("/upload")
@@ -64,6 +71,12 @@ public class FileController {
         FileInputStream fis=new FileInputStream(file.getFilePath());
         response.setHeader("content-type",file.getContentType());
         response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
+        sendFileToUser(response, fis);
+        return new CommonResult(CommonStatus.OK,"下载成功");
+    }
+
+    @ApiIgnore
+    private void sendFileToUser(HttpServletResponse response, FileInputStream fis) throws IOException {
         ServletOutputStream sos=response.getOutputStream();
         byte[] buff=new byte[1024*8];
         int len;
@@ -72,7 +85,6 @@ public class FileController {
         }
         sos.flush();
         sos.close();
-        return new CommonResult(CommonStatus.OK,"下载成功");
     }
 
     @GetMapping("/subFile")
@@ -120,5 +132,26 @@ public class FileController {
         if(!userId.equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         fileService.delFile(fileId);
         return new CommonResult(CommonStatus.OK,"删除成功");
+    }
+
+    @GetMapping("/images/{id}")
+    @ApiOperation("传入用户id,得到图片")
+    public CommonResult image(@PathVariable("id")int id,
+                              @ApiIgnore HttpServletResponse response,
+                              @RequestHeader String Authorization) throws IOException {
+        int userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        if(userId!=id)return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+        FileInputStream fis=new FileInputStream(FILE_STORE_PATH+"\\"+USER_ICON_FOLDER+"\\"+id+".jpg");
+        sendFileToUser(response, fis);
+        return new CommonResult(CommonStatus.OK,"查询成功");
+    }
+
+    @PostMapping("/updateIcon")
+    @ApiOperation("更换头像")
+    public CommonResult updateIcon(MultipartFile multipartFile,
+                                   @RequestHeader String Authorization) throws IOException {
+        int userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        multipartFile.transferTo(Paths.get(FILE_STORE_PATH + "\\" + USER_ICON_FOLDER + "\\" + userId + ".jpg"));
+        return new CommonResult(CommonStatus.OK,"更换成功");
     }
 }

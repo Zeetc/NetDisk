@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ApiOperation("用户注册")
-    public CommonResult register(User user) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException {
+    public CommonResult register(User user) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException, IOException {
         if(user.getUsername()==null||user.getPassword()==null||user.getEmail()==null||
             user.getUsername().trim().length()<1||
             user.getPassword().trim().length()<1||

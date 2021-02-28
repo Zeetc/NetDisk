@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int register(User user) throws DataIntegrityViolationException, SQLIntegrityConstraintViolationException {
+    public int register(User user) throws DataIntegrityViolationException, SQLIntegrityConstraintViolationException, IOException {
         user.setId(null);
         user.setRegisterDate(new Timestamp(System.currentTimeMillis()));
         user.setIsManager(0);
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
         int userId=user.getId();
         File file=new File(FileController.FILE_STORE_PATH +"\\"+userId);
         if(file.mkdir()){
+            fileUtils.copyFileAndRename(userId);
             return userId;
         }
         userMapper.delUser(userId);
@@ -61,7 +63,7 @@ public class UserServiceImpl implements UserService {
         if(user.getIsManager()==1)return false;
         fileMapper.delFileByUser(userId);
         userMapper.delUser(userId);
-        return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId);
+        return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId)&&fileUtils.delUserIcon(userId);
     }
 
     @Override

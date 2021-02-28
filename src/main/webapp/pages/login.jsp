@@ -21,4 +21,6 @@
 <br>
 <a href="${pageContext.request.contextPath}/manager/loginUI">后台工作人员</a>
 </body>
+
+<img src="http://localhost:8888/file/images/45">
 </html>
