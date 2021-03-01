@@ -4,8 +4,6 @@ import com.catchiz.handler.MyAccessDeniedHandler;
 import com.catchiz.handler.MyAuthenticationEntryPoint;
 import com.catchiz.service.impl.CustomAuthenticationProvider;
 import com.catchiz.service.impl.SysUserDetailsService;
-import com.catchiz.service.impl.VerifyServlet;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -88,7 +86,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/**", "/auth/register", "/getVerifyCode", "/favicon.ico","/pages/**").permitAll()
+                .antMatchers("/auth/**", "/favicon.ico","/pages/**").permitAll()
                 .anyRequest()
                 /* 认证+验权处理 */
                 /* 自定义认证类，因为禁用了session，抛弃了RULE验证 */
@@ -110,16 +108,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         //测试阶段，为了方便数据库维护，使用不加密的密码
         return NoOpPasswordEncoder.getInstance();
         //return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * 注入验证码servlet
-     */
-    @Bean
-    public ServletRegistrationBean<VerifyServlet> indexServletRegistration() {
-        ServletRegistrationBean<VerifyServlet> registration = new ServletRegistrationBean<>(new VerifyServlet());
-        //TODO 验证码映射地址
-        registration.addUrlMappings("/getVerifyCode");
-        return registration;
     }
 }

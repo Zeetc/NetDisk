@@ -19,7 +19,7 @@ public interface UserMapper {
     @Delete("delete from user where id = #{id}")
     void delUser(int userId);
 
-    @Select("select * from user where id = #{id} and password =#{password} and isManager = 1")
+    @Select("select * from user where id = #{id} and password = #{password} and isManager = 1")
     User managerLogin(User user);
 
     @Select("select * from user where id = #{id}")

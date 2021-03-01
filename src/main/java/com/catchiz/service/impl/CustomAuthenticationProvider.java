@@ -3,6 +3,8 @@ package com.catchiz.service.impl;
 import com.catchiz.exception.MyAccessDeniedException;
 import com.catchiz.exception.MyAuthenticationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.nio.file.AccessDeniedException;
 
 /**
  * 自定义验证用户名密码验证码逻辑，用户通过访问登录url，进入SysUserDetailsService自定义类
@@ -28,15 +29,24 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Resource
     private PasswordEncoder passwordEncoder;
 
+    private final StringRedisTemplate redisTemplate;
+
+    public CustomAuthenticationProvider(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         /* 获取用户输入的用户名和密码 */
         String inputName = authentication.getName();
         String inputPassword = authentication.getCredentials().toString();
+
         CustomWebAuthenticationDetails details = (CustomWebAuthenticationDetails) authentication.getDetails();
+        //得到用户输入的验证码
         String verifyCode = details.getVerifyCode();
-        //TODO 验证码认证查询
-        if (!validateVerify(verifyCode)) {
+        String uuid=details.getUuid();
+        //判断用户输入的验证码是否正确
+        if (!validateVerify(verifyCode,uuid)) {
             throw new MyAccessDeniedException("验证码输入错误");
         }
         /* userDetails为数据库中查询到的用户信息 */
@@ -52,16 +62,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(inputName, encodePassword, userDetails.getAuthorities());
     }
 
-    private boolean validateVerify(String inputVerify) {
-        /* 获取当前线程绑定的request对象 */
-        //HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        /* 这个validateCode是在servlet中存入session的名字 */
-        //String validateCode = ((String) request.getSession().getAttribute("validateCode")).toLowerCase();
-        //inputVerify = inputVerify.toLowerCase();
-        //log.info("验证码：" + validateCode + "用户输入：" + inputVerify);
-        //TODO 修改
-        //return validateCode.equals("1111");
-        return true;
+    private boolean validateVerify(String inputVerify,String uuid) {
+        if(inputVerify==null||inputVerify.equals(""))return false;
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        String code=operations.get(uuid);
+        if(code==null)return false;
+        return inputVerify.equalsIgnoreCase(code);
     }
 
     @Override

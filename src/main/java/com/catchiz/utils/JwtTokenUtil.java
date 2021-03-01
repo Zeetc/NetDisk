@@ -3,7 +3,6 @@ package com.catchiz.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -114,19 +113,5 @@ public class JwtTokenUtil implements Serializable {
             return null;
         }
     }
-
-    /**
-     * 验证令牌
-     * @param token       令牌
-     * @param userDetails 用户
-     * @return 是否有效
-     */
-    public static Boolean validateToken(String token, UserDetails userDetails) {
-        //JwtUser user = (JwtUser) userDetails;
-        //String username = getUsernameFromToken(token);
-        //return (username.equals(user.getUsername()) && !isTokenExpired(token));
-        return false;
-    }
-
 
 }
