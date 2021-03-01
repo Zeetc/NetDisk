@@ -130,12 +130,15 @@ public class FileController {
 
     @DeleteMapping("/delFile")
     @ApiOperation("删除文件")
-    public CommonResult delFile(int fileId,
+    public CommonResult delFile(int[] fileId,
                                 @RequestHeader String Authorization){
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
-        MyFile file=fileService.getFileById(fileId);
-        if(userId!=file.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
-        fileService.delFile(fileId);
+        for (int fid : fileId) {
+            MyFile file=fileService.getFileById(fid);
+            if(file==null)continue;
+            if(userId!=file.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+            fileService.delFile(fid);
+        }
         return new CommonResult(CommonStatus.OK,"删除成功");
     }
 
