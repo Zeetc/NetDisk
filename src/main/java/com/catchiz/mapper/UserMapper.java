@@ -16,9 +16,6 @@ public interface UserMapper {
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     void register(User user) throws SQLIntegrityConstraintViolationException;
 
-    @Select("select * from user where username = #{username} and password = #{password}")
-    User login(User user);
-
     @Delete("delete from user where id = #{id}")
     void delUser(int userId);
 
@@ -28,9 +25,15 @@ public interface UserMapper {
     @Select("select * from user where id = #{id}")
     User getUserById(int userId);
 
-    @Update("update user set password = '#{password}' where id = #{id}")
+    @Update("update user set password = #{password} where id = #{id}")
     void resetPassword(@Param("id") Integer id,@Param("password") String password);
 
     @Select("select count(*) from user where email = #{email}")
     Integer getEmailCount(@Param("email") String email);
+
+    @Update("update user set email = #{email} where id = #{id}")
+    boolean resetEmail(@Param("id") int id, @Param("email") String email);
+
+    @Update("update user set username = #{username} where id = #{id}")
+    boolean resetUsername(@Param("id")int id, @Param("username")String username);
 }

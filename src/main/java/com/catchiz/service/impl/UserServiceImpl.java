@@ -7,7 +7,6 @@ import com.catchiz.mapper.UserMapper;
 import com.catchiz.service.UserService;
 import com.catchiz.utils.FileUtils;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,11 +52,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User login(User user) throws EmptyResultDataAccessException{
-        return userMapper.login(user);
-    }
-
-    @Override
     public boolean delUser(int userId) {
         User user=userMapper.getUserById(userId);
         if(user.getIsManager()==1)return false;
@@ -87,5 +81,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(int id) {
         return userMapper.getUserById(id);
+    }
+
+    @Override
+    public boolean resetEmail(int userId, String email) {
+        return userMapper.resetEmail(userId,email);
+    }
+
+    @Override
+    public boolean resetUsername(int userId, String username) {
+        return userMapper.resetUsername(userId,username);
     }
 }

@@ -11,8 +11,6 @@ public interface UserService {
 
     int register(User user) throws SQLIntegrityConstraintViolationException, IOException;
 
-    User login(User user);
-
     boolean delUser(int userId);
 
     User managerLogin(User user);
@@ -22,4 +20,8 @@ public interface UserService {
     boolean checkEmailExist(String email);
 
     User getUserById(int id);
+
+    boolean resetEmail(int userId, String email);
+
+    boolean resetUsername(int userId, String username);
 }

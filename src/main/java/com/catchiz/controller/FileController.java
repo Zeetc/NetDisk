@@ -2,7 +2,7 @@ package com.catchiz.controller;
 
 import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
-import com.catchiz.utils.JwtUtils;
+import com.catchiz.utils.JwtTokenUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/file")
@@ -49,7 +50,7 @@ public class FileController {
     public CommonResult uploadFile(MultipartFile[] uploadFile,
                              @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
                              @RequestHeader String Authorization) throws IOException {
-        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(uploadFile==null) return new CommonResult(CommonStatus.FORBIDDEN,"文件上传不能为空");
         for (MultipartFile multipartFile : uploadFile) {
             if (multipartFile == null || multipartFile.isEmpty()) continue;
@@ -66,8 +67,8 @@ public class FileController {
                                  @ApiIgnore HttpServletResponse response,
                                  @RequestHeader String Authorization) throws IOException {
         MyFile file=fileService.getFileById(fileId);
-        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
-        if(!userId.equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无下载权限");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        if(userId!=file.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无下载权限");
         FileInputStream fis=new FileInputStream(file.getFilePath());
         response.setHeader("content-type",file.getContentType());
         response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
@@ -95,13 +96,17 @@ public class FileController {
                                 @RequestParam(value = "pageCut", required = false,defaultValue = "true")boolean pageCut,
                                 @RequestHeader String Authorization){
         if(pid!=-1&&fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
-        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,false,pageCut);
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
-        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount / PAGE_SIZE : (totalCount / PAGE_SIZE) + 1;
+        return getCommonResult(pid, curPage, fileName, userId, myFileList, totalCount, PAGE_SIZE);
+
+    }
+
+    static CommonResult getCommonResult(int pid, int curPage,String fileName, int userId, List<MyFile> myFileList, int totalCount, int pageSize) {
+        int totalPage = totalCount % pageSize == 0 ? totalCount / pageSize : (totalCount / pageSize) + 1;
         if (totalPage == 0) totalPage = 1;
         return new CommonResult(CommonStatus.OK, "查询成功", myFileList, new PageBean(pid, totalPage, curPage, fileName, userId));
-
     }
 
     @GetMapping("/parentFile")
@@ -116,7 +121,7 @@ public class FileController {
     public CommonResult addFolder(@RequestParam("foldName") String foldName,
                                   @RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                   @RequestHeader String Authorization) throws IOException {
-        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(!foldName.equals("")&&fileService.createFolder(foldName,userId,pid)){
             return new CommonResult(CommonStatus.OK,"添加文件夹成功");
         }
@@ -127,9 +132,9 @@ public class FileController {
     @ApiOperation("删除文件")
     public CommonResult delFile(int fileId,
                                 @RequestHeader String Authorization){
-        Integer userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         MyFile file=fileService.getFileById(fileId);
-        if(!userId.equals(file.getUid()))return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+        if(userId!=file.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         fileService.delFile(fileId);
         return new CommonResult(CommonStatus.OK,"删除成功");
     }
@@ -139,7 +144,7 @@ public class FileController {
     public CommonResult image(@PathVariable("id")int id,
                               @ApiIgnore HttpServletResponse response,
                               @RequestHeader String Authorization) throws IOException {
-        int userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(userId!=id)return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         FileInputStream fis=new FileInputStream(FILE_STORE_PATH+"\\"+USER_ICON_FOLDER+"\\"+id+".jpg");
         sendFileToUser(response, fis);
@@ -150,7 +155,7 @@ public class FileController {
     @ApiOperation("更换头像")
     public CommonResult updateIcon(MultipartFile multipartFile,
                                    @RequestHeader String Authorization) throws IOException {
-        int userId= (Integer) JwtUtils.getClaim(Authorization).get("userId");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         multipartFile.transferTo(Paths.get(FILE_STORE_PATH + "\\" + USER_ICON_FOLDER + "\\" + userId + ".jpg"));
         return new CommonResult(CommonStatus.OK,"更换成功");
     }

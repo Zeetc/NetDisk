@@ -3,16 +3,13 @@ package com.catchiz.controller;
 import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
-import com.catchiz.utils.JwtUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/manager")
@@ -30,19 +27,6 @@ public class ManagerController {
     @Value("${NetDisk.pageSize}")
     public void setPageSize(int pageSize){
         ManagerController.PAGE_SIZE = pageSize;
-    }
-
-    @PostMapping("/login")
-    @ApiOperation("管理用户登录")
-    public CommonResult login(User user){
-        User manager=userService.managerLogin(user);
-        if(manager==null){
-            return new CommonResult(CommonStatus.NOTFOUND,"登录失败");
-        }
-        Map<String,Object> map=new HashMap<>();
-        map.put("manager",true);
-        map.put("userId",manager.getId());
-        return new CommonResult(CommonStatus.OK,"登录成功", JwtUtils.generate(map));
     }
 
     @GetMapping("/getAllUser")
@@ -84,9 +68,7 @@ public class ManagerController {
         List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,true,pageCut);
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
         int curPid=(pid==-1?-1:fileService.getCurPid(pid));
-        int totalPage = totalCount % PAGE_SIZE == 0 ? totalCount/ PAGE_SIZE : (totalCount/ PAGE_SIZE) + 1 ;
-        if(totalPage==0)totalPage = 1;
-        return new CommonResult(CommonStatus.OK,"查询成功",myFileList,new PageBean(curPid,totalPage,curPage,fileName,userId));
+        return FileController.getCommonResult(curPid, curPage, fileName, userId, myFileList, totalCount, PAGE_SIZE);
     }
 
     @GetMapping("/parentFile")
