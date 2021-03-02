@@ -9,7 +9,7 @@ import java.util.List;
 @Component("fileMapper")
 public interface FileMapper {
     @Insert("insert into file values(#{fileId},#{filename},#{filePath},#{fileSize},\n" +
-            "                        #{isValidFile},#{uploadDate},#{contentType},#{uid},#{pid})")
+            "                        #{isValidFile},#{uploadDate},#{contentType},#{uid},#{pid},#{check})")
     @Options(useGeneratedKeys = true,keyColumn = "fileId",keyProperty = "fileId")
     void storeFile(MyFile file);
 
@@ -70,5 +70,11 @@ public interface FileMapper {
     })
     int findCountByInfo(@Param("pid") int pid,@Param("userId") int userId,
                         @Param("fileName") String fileName,@Param("isIgnoreValid") boolean isIgnoreValid);
+
+    @Update("update file set check = #{check} where fileId = #{fileId}")
+    void changeCheck(@Param("fileId") int fileId,@Param("check") int check);
+
+    @Select("select * from file where check = #{check}")
+    List<MyFile> getAllFileByCheck(int check);
 
 }

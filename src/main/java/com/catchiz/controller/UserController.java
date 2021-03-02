@@ -5,8 +5,8 @@ import com.catchiz.domain.CommonResult;
 import com.catchiz.domain.CommonStatus;
 import com.catchiz.service.UserService;
 import com.catchiz.utils.JwtTokenUtil;
+import io.jsonwebtoken.Claims;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -42,6 +42,14 @@ public class UserController {
     public CommonResult exit(@ApiIgnore HttpServletRequest request){
         request.getSession().invalidate();
         return new CommonResult(CommonStatus.OK,"退出成功");
+    }
+
+    @GetMapping("/refreshToken")
+    @ApiOperation("刷新token")
+    public CommonResult refreshToken(@RequestHeader String Authorization){
+        Claims claims=JwtTokenUtil.getClaimsFromToken(Authorization);
+        if(claims==null)return new CommonResult(CommonStatus.FORBIDDEN,"无效认证");
+        return new CommonResult(CommonStatus.OK,"刷新认证成功",JwtTokenUtil.generateToken(claims.getSubject(),(boolean) claims.get("isManager")));
     }
 
     @GetMapping("/applyForResetPassword")

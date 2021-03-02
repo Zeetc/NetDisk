@@ -85,4 +85,11 @@ public class ManagerController {
         return new CommonResult(CommonStatus.OK,"退出成功");
     }
 
+    @GetMapping("/getAllFileByCheck")
+    @ApiOperation("根据是否已经审核获取文件，check为1代表已审核，0为未审核")
+    public CommonResult getAllCheckedFile(@RequestParam int check){
+        if(check==0)return new CommonResult(CommonStatus.OK,"查询成功",fileService.getAllUnCheckedFile());
+        return new CommonResult(CommonStatus.OK,"查询成功",fileService.getAllCheckedFile());
+    }
+
 }

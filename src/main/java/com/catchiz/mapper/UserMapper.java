@@ -32,10 +32,10 @@ public interface UserMapper {
     Integer getEmailCount(@Param("email") String email);
 
     @Update("update user set email = #{email} where id = #{id}")
-    boolean resetEmail(@Param("id") int id, @Param("email") String email);
+    int resetEmail(@Param("id") int id, @Param("email") String email);
 
     @Update("update user set username = #{username} where id = #{id}")
-    boolean resetUsername(@Param("id")int id, @Param("username")String username);
+    int resetUsername(@Param("id")int id, @Param("username")String username);
 
     @Select("select email from user where id = #{id}")
     String getEmailById(int id);

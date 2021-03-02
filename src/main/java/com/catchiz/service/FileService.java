@@ -29,4 +29,12 @@ public interface FileService {
     MyFile getFileByPath(String filePath);
 
     boolean storeFilePrepare(MultipartFile multipartFile, int userId, int pid) throws IOException;
+
+    void setChecked(int fileId);
+
+    void setUnchecked(int fileId);
+
+    List<MyFile> getAllCheckedFile();
+
+    List<MyFile> getAllUnCheckedFile();
 }

@@ -41,6 +41,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void changeFileValid(int fileId,int isValidFile) {
         fileMapper.changeFileValid(fileId,isValidFile==1?0:1);
+        fileMapper.changeCheck(fileId,1);
     }
 
     @Override
@@ -109,6 +110,26 @@ public class FileServiceImpl implements FileService {
         dynamicConstructMyFile(file,dirs[dirs.length-1],path, multipartFile.getSize(), 1,multipartFile.getContentType(), userId, dynamicPid);
         storeFile(file);
         return true;
+    }
+
+    @Override
+    public void setChecked(int fileId) {
+        fileMapper.changeCheck(fileId,1);
+    }
+
+    @Override
+    public void setUnchecked(int fileId) {
+        fileMapper.changeCheck(fileId,0);
+    }
+
+    @Override
+    public List<MyFile> getAllCheckedFile(){
+        return fileMapper.getAllFileByCheck(1);
+    }
+
+    @Override
+    public List<MyFile> getAllUnCheckedFile(){
+        return fileMapper.getAllFileByCheck(0);
     }
 
     public void dynamicConstructMyFile(MyFile myFile,String fileName,String filePath,long fileSize,int isValidFile,String contentType,int uid,int pid){

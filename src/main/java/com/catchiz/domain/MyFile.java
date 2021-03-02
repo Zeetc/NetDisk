@@ -31,4 +31,6 @@ public class MyFile {
 
     private Integer pid;
 
+    private int check;
+
 }

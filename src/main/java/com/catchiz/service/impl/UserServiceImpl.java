@@ -90,11 +90,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean resetEmail(int userId, String email) {
-        return userMapper.resetEmail(userId,email);
+        return userMapper.resetEmail(userId,email)==1;
     }
 
     @Override
     public boolean resetUsername(int userId, String username) {
-        return userMapper.resetUsername(userId,username);
+        return userMapper.resetUsername(userId,username)==1;
     }
 }
