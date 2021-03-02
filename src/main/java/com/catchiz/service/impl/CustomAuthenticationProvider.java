@@ -67,7 +67,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         String code=operations.get(uuid);
         if(code==null)return false;
-        return inputVerify.equalsIgnoreCase(code);
+        boolean flag=inputVerify.equalsIgnoreCase(code);
+        redisTemplate.delete(code);
+        return flag;
     }
 
     @Override

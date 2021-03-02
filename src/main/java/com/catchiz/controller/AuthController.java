@@ -37,27 +37,27 @@ public class AuthController {
     @PostMapping("/register")
     @ApiOperation("用户注册")
     public CommonResult register(User user) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException, IOException {
-        if(user.getUsername()==null||user.getPassword()==null||user.getEmail()==null||
-                user.getUsername().trim().length()<1||
-                user.getPassword().trim().length()<1||
-                user.getEmail().trim().length()<1){
-            return new CommonResult(CommonStatus.FORBIDDEN,"账号输入不合法");
+        if (user.getUsername() == null || user.getPassword() == null || user.getEmail() == null ||
+                user.getUsername().trim().length() < 1 ||
+                user.getPassword().trim().length() < 1 ||
+                user.getEmail().trim().length() < 1) {
+            return new CommonResult(CommonStatus.FORBIDDEN, "账号输入不合法");
         }
-        if(userService.checkEmailExist(user.getEmail())){
-            return new CommonResult(CommonStatus.FORBIDDEN,"邮箱已存在");
+        if (userService.checkEmailExist(user.getEmail())) {
+            return new CommonResult(CommonStatus.FORBIDDEN, "邮箱已存在");
         }
-        int userId=userService.register(user);
-        if(userId!=-1) {
-            return new CommonResult(CommonStatus.CREATE,"注册成功",userId);
-        }else {
-            return new CommonResult(CommonStatus.EXCEPTION,"注册失败");
+        int userId = userService.register(user);
+        if (userId != -1) {
+            return new CommonResult(CommonStatus.CREATE, "注册成功", userId);
+        } else {
+            return new CommonResult(CommonStatus.EXCEPTION, "注册失败");
         }
     }
 
     @GetMapping("/getVerifyCode")
     @ApiOperation("获取验证码的Authorization")
-    public CommonResult getVerifyCode(){
-        String uuid= UUID.randomUUID().toString();
+    public CommonResult getVerifyCode() {
+        String uuid = UUID.randomUUID().toString();
         StringBuilder randomCode = new StringBuilder();
         char[] codeSequence = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
                 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
@@ -71,10 +71,9 @@ public class AuthController {
             randomCode.append(strRand);
         }
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        operations.set(uuid,randomCode.toString());
-        redisTemplate.expire(uuid,1, TimeUnit.MINUTES);
+        operations.set(uuid, randomCode.toString(), 1, TimeUnit.MINUTES);
         System.out.println(redisTemplate.opsForValue().get(uuid));
-        return new CommonResult(CommonStatus.OK,"获得成功", uuid);
+        return new CommonResult(CommonStatus.OK, "获得成功", uuid);
     }
 
     @GetMapping("/getVerifyPic")
@@ -121,10 +120,10 @@ public class AuthController {
         int red, green, blue;
         // 随机产生codeCount数字的验证码。
         String s = redisTemplate.opsForValue().get(Authorization);
-        if(s==null||s.equals(""))s="Wrong";
+        if (s == null || s.equals("")) s = "Wrong";
         for (int i = 0; i < codeCount; i++) {
             // 得到随机产生的验证码数字。
-            String strRand = s.charAt(i)+"";
+            String strRand = s.charAt(i) + "";
             // 产生随机的颜色分量来构造颜色值，这样输出的每位数字的颜色值都将不同。
             red = random.nextInt(255);
             green = random.nextInt(255);

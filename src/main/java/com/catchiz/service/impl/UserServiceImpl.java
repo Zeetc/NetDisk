@@ -73,6 +73,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String getEmailById(int id) {
+        return userMapper.getEmailById(id);
+    }
+
+    @Override
     public boolean checkEmailExist(String email) {
         Integer emailCount= userMapper.getEmailCount(email);
         return emailCount!=null&&emailCount!=0;

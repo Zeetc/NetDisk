@@ -36,4 +36,7 @@ public interface UserMapper {
 
     @Update("update user set username = #{username} where id = #{id}")
     boolean resetUsername(@Param("id")int id, @Param("username")String username);
+
+    @Select("select email from user where id = #{id}")
+    String getEmailById(int id);
 }
