@@ -3,8 +3,12 @@ package com.catchiz.controller;
 import com.catchiz.domain.*;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.JwtTokenUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
@@ -14,10 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/file")
 public class FileController {
 
@@ -26,9 +34,13 @@ public class FileController {
     public static String USER_ICON_FOLDER;
 
     private final FileService fileService;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
 
-    public FileController(FileService fileService) {
+    public FileController(FileService fileService, StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
         this.fileService = fileService;
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Value("${NetDisk.fileStorePath}")
@@ -161,5 +173,28 @@ public class FileController {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         multipartFile.transferTo(Paths.get(FILE_STORE_PATH + "\\" + USER_ICON_FOLDER + "\\" + userId + ".jpg"));
         return new CommonResult(CommonStatus.OK,"更换成功");
+    }
+
+    @GetMapping("/share")
+    @ApiOperation("分享文件")
+    public CommonResult shareFiles(int[] file) throws JsonProcessingException {
+        FileTree fileTree=fileService.getFileTree(file);
+        String uuid= UUID.randomUUID().toString();
+        String verifyCode=uuid.substring(0,4);
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        operations.set(uuid+verifyCode,objectMapper.writeValueAsString(fileTree),3,TimeUnit.DAYS);
+        return new CommonResult(CommonStatus.OK,"分享成功", Arrays.asList(uuid,verifyCode));
+    }
+
+    @GetMapping("/getShare")
+    @ApiOperation("获取分享的文件")
+    public CommonResult getShare(String uuid,String verifyCode,String path) throws JsonProcessingException {
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        String val = operations.get(uuid + verifyCode);
+        if (val == null) return new CommonResult(CommonStatus.FORBIDDEN, "错误的分享链接");
+        FileTree fileTree = objectMapper.readValue(val, FileTree.class);
+        String[] paths = path.split("/");
+        List<MyFile> files = fileService.getFilesByFileTree(fileTree.search(paths,fileTree));
+        return new CommonResult(CommonStatus.OK, "查询成功", files);
     }
 }

@@ -55,7 +55,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         /* 密码加密后 */
         String encodePassword = passwordEncoder.encode(inputPassword);
         /* 校验密码是否一致 */
-        System.out.println(passwordEncoder.matches(password,encodePassword));
         if (!passwordEncoder.matches(password,encodePassword)) {
             throw new MyAuthenticationException("密码错误");
         }
@@ -63,7 +62,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     private boolean validateVerify(String inputVerify,String uuid) {
-        if(inputVerify==null||inputVerify.equals(""))return false;
+        if(inputVerify==null||inputVerify.equals("")||uuid==null||uuid.equals(""))return false;
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         String code=operations.get(uuid);
         if(code==null)return false;

@@ -1,5 +1,6 @@
 package com.catchiz.service;
 
+import com.catchiz.domain.FileTree;
 import com.catchiz.domain.MyFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,4 +38,8 @@ public interface FileService {
     List<MyFile> getAllCheckedFile();
 
     List<MyFile> getAllUnCheckedFile();
+
+    FileTree getFileTree(int[] fileIds);
+
+    List<MyFile> getFilesByFileTree(FileTree fileTree);
 }

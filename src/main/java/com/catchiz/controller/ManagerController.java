@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/manager")
 public class ManagerController {
     private final UserService userService;
@@ -54,6 +55,20 @@ public class ManagerController {
     @ApiOperation("改变文件合法属性->false的话普通用户无法获取文件")
     public CommonResult changeFileValid(int fileId, int isValidFile){
         fileService.changeFileValid(fileId,isValidFile);
+        return new CommonResult(CommonStatus.OK,"修改文件属性成功");
+    }
+
+    @PatchMapping("/changeFileCheck")
+    @ApiOperation("设置文件为已检查")
+    public CommonResult changeFileCheck(int fileId){
+        fileService.setChecked(fileId);
+        return new CommonResult(CommonStatus.OK,"修改文件属性成功");
+    }
+
+    @PatchMapping("/changeFileUnCheck")
+    @ApiOperation("设置文件为未检查")
+    public CommonResult changeFileUnCheck(int fileId){
+        fileService.setUnchecked(fileId);
         return new CommonResult(CommonStatus.OK,"修改文件属性成功");
     }
 

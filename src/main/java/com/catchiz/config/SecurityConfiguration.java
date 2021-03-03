@@ -5,6 +5,7 @@ import com.catchiz.handler.MyAuthenticationEntryPoint;
 import com.catchiz.service.impl.CustomAuthenticationProvider;
 import com.catchiz.service.impl.SysUserDetailsService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -87,6 +88,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/**", "/favicon.ico","/pages/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest()
                 /* 认证+验权处理 */
                 /* 自定义认证类，因为禁用了session，抛弃了RULE验证 */
@@ -95,7 +97,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 /* 禁用session（完全禁用）  */
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .csrf().disable();
+                .cors().and().csrf().disable();
 
         /* 注册自定义异常 */
         http.exceptionHandling().

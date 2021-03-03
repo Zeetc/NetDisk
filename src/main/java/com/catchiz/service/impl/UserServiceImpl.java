@@ -1,6 +1,7 @@
 package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
+import com.catchiz.domain.FileTree;
 import com.catchiz.domain.User;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.mapper.UserMapper;
@@ -15,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.List;
+import java.util.*;
 
 @Service("userService")
 @Transactional
@@ -97,4 +98,5 @@ public class UserServiceImpl implements UserService {
     public boolean resetUsername(int userId, String username) {
         return userMapper.resetUsername(userId,username)==1;
     }
+
 }

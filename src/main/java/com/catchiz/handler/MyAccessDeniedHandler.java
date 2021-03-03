@@ -23,7 +23,7 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
         ObjectMapper mapper = new ObjectMapper();
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write(mapper.writeValueAsString(new CommonResult(CommonStatus.FORBIDDEN,"权限不足",
+        response.getWriter().write(mapper.writeValueAsString(new CommonResult(CommonStatus.FORBIDDEN,"密码/验证码错误或权限不足",
                 Arrays.asList(accessDeniedException.getMessage(),request.getServletPath(),System.currentTimeMillis())
                 ))
         );

@@ -71,6 +71,12 @@ public interface FileMapper {
     int findCountByInfo(@Param("pid") int pid,@Param("userId") int userId,
                         @Param("fileName") String fileName,@Param("isIgnoreValid") boolean isIgnoreValid);
 
+    @Select("select fileId from file where pid = #{pid}")
+    List<Integer> getChildFiles(int pid);
+
+    @Select("select fileName from file where fileId = #{fileId}")
+    String getFilenameById(int fileId);
+
     @Update("update file set check = #{check} where fileId = #{fileId}")
     void changeCheck(@Param("fileId") int fileId,@Param("check") int check);
 

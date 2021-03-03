@@ -1,6 +1,7 @@
 package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
+import com.catchiz.domain.FileTree;
 import com.catchiz.domain.MyFile;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.service.FileService;
@@ -12,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.*;
 
 @Service("fileService")
 @Transactional
@@ -143,5 +144,39 @@ public class FileServiceImpl implements FileService {
         myFile.setPid(pid);
     }
 
+    @Override
+    public FileTree getFileTree(int[] fileIds) {
+        FileTree fileTree=new FileTree();
+        for (Integer fileId : fileIds) {
+            FileTree curFileTree=new FileTree(fileId);
+            Queue<FileTree> queue=new LinkedList<>();
+            queue.offer(curFileTree);
+            while (!queue.isEmpty()){
+                int size=queue.size();
+                for (int i = 0; i < size; i++) {
+                    FileTree f=queue.poll();
+                    if(f==null)continue;
+                    List<Integer> child=fileMapper.getChildFiles(f.getFileId());
+                    for (Integer id : child) {
+                        FileTree c=new FileTree(id);
+                        f.getChildFiles().put(fileMapper.getFilenameById(id),c);
+                        queue.add(c);
+                    }
+                }
+            }
+            fileTree.getChildFiles().put(fileMapper.getFilenameById(fileId),curFileTree);
+        }
+        return fileTree;
+    }
 
+    @Override
+    public List<MyFile> getFilesByFileTree(FileTree fileTree) {
+        List<MyFile> list=new ArrayList<>();
+        Map<String,FileTree> childFiles =fileTree.getChildFiles();
+        for (Map.Entry<String, FileTree> entry : childFiles.entrySet()) {
+            FileTree child=entry.getValue();
+            list.add(fileMapper.getFileById(child.getFileId()));
+        }
+        return list;
+    }
 }

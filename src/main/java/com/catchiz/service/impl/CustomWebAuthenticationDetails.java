@@ -14,6 +14,7 @@ public class CustomWebAuthenticationDetails extends WebAuthenticationDetails {
     private static final long serialVersionUID = 1L;
 
     private final String verifyCode;
+
     private final String uuid;
 
     public String getUuid() {
@@ -25,7 +26,6 @@ public class CustomWebAuthenticationDetails extends WebAuthenticationDetails {
         /* verifyCode为页面中验证码的name */
         verifyCode = request.getParameter("verifyCode");
         uuid = request.getHeader("Authorization");
-        System.out.println(verifyCode);
     }
 
     public String getVerifyCode() {
