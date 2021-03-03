@@ -89,6 +89,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/auth/**", "/favicon.ico","/pages/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
+
+                /*  swagger 访问开放*/
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/webjars/**").permitAll()
+                .antMatchers("/v2/**").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/swagger*/**").permitAll()
                 .anyRequest()
                 /* 认证+验权处理 */
                 /* 自定义认证类，因为禁用了session，抛弃了RULE验证 */
