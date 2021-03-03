@@ -197,4 +197,14 @@ public class FileController {
         List<MyFile> files = fileService.getFilesByFileTree(fileTree.search(paths,fileTree));
         return new CommonResult(CommonStatus.OK, "查询成功", files);
     }
+
+    @PostMapping("/copyFileTo")
+    @ApiOperation("复制文件到另一个文件夹")
+    public CommonResult copyFileTo(int curFileId,
+                                   int targetFileId,
+                                   @RequestHeader String Authorization) throws IOException {
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        fileService.copyFileTo(curFileId,targetFileId,userId);
+        return new CommonResult(CommonStatus.OK,"复制成功");
+    }
 }

@@ -20,6 +20,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -35,6 +36,8 @@ public class AuthController {
 
     private final StringRedisTemplate redisTemplate;
 
+    private final Pattern emailPattern=Pattern.compile("^\\s*\\w+(?:\\.?[\\w-]+)*@[a-zA-Z0-9]+(?:[-.][a-zA-Z0-9]+)*\\.[a-zA-Z]+\\s*$");
+
     @PostMapping("/register")
     @ApiOperation("用户注册")
     public CommonResult register(User user) throws SQLIntegrityConstraintViolationException, DataIntegrityViolationException, IOException {
@@ -46,6 +49,9 @@ public class AuthController {
         }
         if (userService.checkEmailExist(user.getEmail())) {
             return new CommonResult(CommonStatus.FORBIDDEN, "邮箱已存在");
+        }
+        if(!emailPattern.matcher(user.getEmail()).matches()){
+            return new CommonResult(CommonStatus.FORBIDDEN,"邮箱不合法");
         }
         int userId = userService.register(user);
         if (userId != -1) {

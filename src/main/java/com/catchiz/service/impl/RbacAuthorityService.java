@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * RBAC 所有的请求都会到这里做权限校验
@@ -26,6 +27,7 @@ public class RbacAuthorityService {
         String token = request.getHeader("Authorization");
         Claims claims=JwtTokenUtil.getClaimsFromToken(token);
         if(claims==null)return false;
+        if(claims.getExpiration().before(new Date()))return false;
         String id=claims.getSubject();
         if(id==null||id.equals(""))return false;
         // 自定义登录规则，如果有userID就可以访问/file 和/user

@@ -42,4 +42,6 @@ public interface FileService {
     FileTree getFileTree(int[] fileIds);
 
     List<MyFile> getFilesByFileTree(FileTree fileTree);
+
+    void copyFileTo(int curFileId, int targetFileId,int uid) throws IOException;
 }

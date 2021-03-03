@@ -179,4 +179,16 @@ public class FileServiceImpl implements FileService {
         }
         return list;
     }
+
+    @Override
+    public void copyFileTo(int curFileId, int targetFileId,int uid) throws IOException {
+        MyFile originFile=fileMapper.getFileById(curFileId);
+        String targetFilePath;
+        if(targetFileId!=-1){
+            MyFile targetFile=fileMapper.getFileById(targetFileId);
+            targetFilePath=targetFile.getFilePath();
+        }else targetFilePath=FileController.FILE_STORE_PATH+"/"+uid;
+        File origin=new File(originFile.getFilePath());
+        fileUtils.copyFileTo(origin,targetFilePath,uid,targetFileId);
+    }
 }

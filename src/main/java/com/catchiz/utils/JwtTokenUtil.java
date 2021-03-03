@@ -82,7 +82,6 @@ public class JwtTokenUtil implements Serializable {
 
     /**
      * 判断令牌是否过期
-     *
      * @param token 令牌
      * @return 是否过期
      */
@@ -99,7 +98,6 @@ public class JwtTokenUtil implements Serializable {
 
     /**
      * 刷新令牌
-     *
      * @param token 原令牌
      * @return 新令牌
      */
