@@ -1,7 +1,6 @@
 package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
-import com.catchiz.domain.FileTree;
 import com.catchiz.domain.User;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.mapper.UserMapper;

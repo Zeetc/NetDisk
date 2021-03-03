@@ -43,13 +43,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Resource
     private AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
 
-    /* 自己编写的认证逻辑替换系统自带认证 */
+    // 自己编写的认证逻辑替换系统自带认证
     @Resource
     private CustomAuthenticationProvider customAuthenticationProvider;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        /* 注册自己编写的认证逻辑 */
+        // 注册自己编写的认证逻辑
         auth.authenticationProvider(customAuthenticationProvider);
         auth.userDetailsService(sysUserDetailsService).passwordEncoder(new PasswordEncoder() {
             @Override
@@ -66,7 +66,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        /* 设置拦截忽略文件夹，可以对静态资源放行 */
+        // 设置拦截忽略文件夹，可以对静态资源放行
         web.ignoring().antMatchers("/css/**", "/js/**");
     }
 
@@ -83,30 +83,30 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 //.logout()
                 //.logoutUrl("/auth/logout")
                 //.logoutSuccessUrl("/login.html")
-                /* 验证码 */
+                // 验证码
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/**", "/favicon.ico","/pages/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
 
-                /*  swagger 访问开放*/
+                //  swagger 访问开放
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/webjars/**").permitAll()
                 .antMatchers("/v2/**").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/swagger*/**").permitAll()
                 .anyRequest()
-                /* 认证+验权处理 */
-                /* 自定义认证类，因为禁用了session，抛弃了RULE验证 */
+                // 认证+验权处理
+                // 自定义认证类，因为禁用了session，抛弃了RULE验证
                 .access("@rbacService.hasPermission(request)")
                 .and()
-                /* 禁用session（完全禁用）  */
+                // 禁用session（完全禁用）
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .cors().and().csrf().disable();
 
-        /* 注册自定义异常 */
+        // 注册自定义异常
         http.exceptionHandling().
                 authenticationEntryPoint(myAuthenticationEntryPoint).
                 accessDeniedHandler(myAccessDeniedHandler);

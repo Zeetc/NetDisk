@@ -1,9 +1,10 @@
 package com.catchiz.service.impl;
 
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
 import javax.servlet.http.HttpServletRequest;
 
-/**
+/*
  * 获取用户登录时携带的额外信息
  * 也就是验证码
  * 重写自WebAuthenticationDetails类后，构造方法就多了一个内容，也就是获取request里面的verifyCode参数
@@ -23,7 +24,7 @@ public class CustomWebAuthenticationDetails extends WebAuthenticationDetails {
 
     public CustomWebAuthenticationDetails(HttpServletRequest request) {
         super(request);
-        /* verifyCode为页面中验证码的name */
+        // verifyCode为页面中验证码的name
         verifyCode = request.getParameter("verifyCode");
         uuid = request.getHeader("Authorization");
     }
