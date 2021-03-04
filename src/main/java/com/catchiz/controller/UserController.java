@@ -40,8 +40,8 @@ public class UserController {
 
     @GetMapping("/exit")
     @ApiOperation("普通用户退出")
-    public CommonResult exit(@ApiIgnore HttpServletRequest request){
-        request.getSession().invalidate();
+    public CommonResult exit(@RequestHeader String Authorization){
+        redisTemplate.opsForValue().set(Authorization,Authorization,30, TimeUnit.MINUTES);
         return new CommonResult(CommonStatus.OK,"退出成功");
     }
 

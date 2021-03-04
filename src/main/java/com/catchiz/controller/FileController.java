@@ -141,7 +141,7 @@ public class FileController {
     }
 
     @DeleteMapping("/delFile")
-    @ApiOperation("删除文件")
+    @ApiOperation("删除文件，需要传一个要删除的文件id，该文件及其子文件将全部被删除")
     public CommonResult delFile(int[] fileId,
                                 @RequestHeader String Authorization){
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
@@ -155,7 +155,7 @@ public class FileController {
     }
 
     @GetMapping("/images/{id}")
-    @ApiOperation("传入用户id,得到图片")
+    @ApiOperation("传入用户id,得到用户头像")
     public CommonResult image(@PathVariable("id")int id,
                               @ApiIgnore HttpServletResponse response,
                               @RequestHeader String Authorization) throws IOException {
@@ -167,16 +167,18 @@ public class FileController {
     }
 
     @PostMapping("/updateIcon")
-    @ApiOperation("更换头像")
+    @ApiOperation("更换头像，需要上传一张jpg图片")
     public CommonResult updateIcon(MultipartFile multipartFile,
                                    @RequestHeader String Authorization) throws IOException {
+        if(multipartFile.isEmpty()||multipartFile.getContentType()==null)return new CommonResult(CommonStatus.FORBIDDEN,"无效文件");
+        if(!multipartFile.getContentType().toLowerCase().startsWith("image/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许上传图片类型");
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         multipartFile.transferTo(Paths.get(FILE_STORE_PATH + "\\" + USER_ICON_FOLDER + "\\" + userId + ".jpg"));
         return new CommonResult(CommonStatus.OK,"更换成功");
     }
 
     @GetMapping("/share")
-    @ApiOperation("分享文件")
+    @ApiOperation("分享文件，会返回一个链接地址，以及一个提取码，分享文件有效期3天")
     public CommonResult shareFiles(int[] file) throws JsonProcessingException {
         FileTree fileTree=fileService.getFileTree(file);
         String uuid= UUID.randomUUID().toString();
@@ -187,7 +189,7 @@ public class FileController {
     }
 
     @GetMapping("/getShare")
-    @ApiOperation("获取分享的文件")
+    @ApiOperation("获取分享的文件，需要输入正确的链接和提取码")
     public CommonResult getShare(String uuid,String verifyCode,String path) throws JsonProcessingException {
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         String val = operations.get(uuid + verifyCode);
@@ -199,7 +201,7 @@ public class FileController {
     }
 
     @PostMapping("/copyFileTo")
-    @ApiOperation("复制文件到另一个文件夹")
+    @ApiOperation("复制文件到另一个文件夹，需要当前文件的文件id，和目标文件的id，如果想复制到根目录下，目标文件的id是-1")
     public CommonResult copyFileTo(int curFileId,
                                    int targetFileId,
                                    @RequestHeader String Authorization) throws IOException {

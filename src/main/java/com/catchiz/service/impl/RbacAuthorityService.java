@@ -3,7 +3,9 @@ package com.catchiz.service.impl;
 import com.catchiz.utils.JwtTokenUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
@@ -17,14 +19,21 @@ import java.util.Date;
 @Component("rbacService")
 public class RbacAuthorityService {
 
+    public RbacAuthorityService(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Bean
     private AntPathMatcher antPathMatcher() {
         return new AntPathMatcher();
     }
 
+    private final StringRedisTemplate redisTemplate;
+
     public boolean hasPermission(HttpServletRequest request) {
         log.info("current request is:" + request.getRequestURI());
         String token = request.getHeader("Authorization");
+        if(redisTemplate.opsForValue().get(token)!=null)return false;
         Claims claims=JwtTokenUtil.getClaimsFromToken(token);
         if(claims==null)return false;
         if(claims.getExpiration().before(new Date()))return false;
