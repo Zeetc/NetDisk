@@ -33,7 +33,7 @@ public class RbacAuthorityService {
     public boolean hasPermission(HttpServletRequest request) {
         log.info("current request is:" + request.getRequestURI());
         String token = request.getHeader("Authorization");
-        if(redisTemplate.opsForValue().get(token)!=null)return false;
+        if(token!=null&&redisTemplate.opsForValue().get(token)!=null)return false;
         Claims claims=JwtTokenUtil.getClaimsFromToken(token);
         if(claims==null)return false;
         if(claims.getExpiration().before(new Date()))return false;
