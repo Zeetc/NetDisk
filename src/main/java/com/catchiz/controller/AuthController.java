@@ -1,8 +1,8 @@
 package com.catchiz.controller;
 
-import com.catchiz.domain.CommonResult;
-import com.catchiz.domain.CommonStatus;
-import com.catchiz.domain.User;
+import com.catchiz.pojo.CommonResult;
+import com.catchiz.pojo.CommonStatus;
+import com.catchiz.pojo.User;
 import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.dao.DataIntegrityViolationException;

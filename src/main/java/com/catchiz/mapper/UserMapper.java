@@ -1,6 +1,6 @@
 package com.catchiz.mapper;
 
-import com.catchiz.domain.User;
+import com.catchiz.pojo.User;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +18,6 @@ public interface UserMapper {
 
     @Delete("delete from user where id = #{id}")
     void delUser(int userId);
-
-    @Select("select * from user where id = #{id} and password = #{password} and isManager = 1")
-    User managerLogin(User user);
 
     @Select("select * from user where id = #{id}")
     User getUserById(int userId);

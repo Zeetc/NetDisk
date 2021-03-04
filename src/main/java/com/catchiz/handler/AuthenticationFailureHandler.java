@@ -1,7 +1,7 @@
 package com.catchiz.handler;
 
-import com.catchiz.domain.CommonResult;
-import com.catchiz.domain.CommonStatus;
+import com.catchiz.pojo.CommonResult;
+import com.catchiz.pojo.CommonStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

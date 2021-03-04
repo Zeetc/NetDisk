@@ -1,11 +1,13 @@
 package com.catchiz.controller;
 
-import com.catchiz.domain.*;
+import com.catchiz.pojo.*;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.JwtTokenUtil;
+import com.catchiz.utils.ZipUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -15,7 +17,9 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -26,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
+@Slf4j
 @RequestMapping("/file")
 public class FileController {
 
@@ -60,8 +65,8 @@ public class FileController {
     @PostMapping("/upload")
     @ApiOperation("用户上传文件/文件夹")
     public CommonResult uploadFile(MultipartFile[] uploadFile,
-                             @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
-                             @RequestHeader String Authorization) throws IOException {
+                                   @RequestParam(value = "pid",required = false,defaultValue = "-1") int pid,
+                                   @RequestHeader String Authorization) throws IOException {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(uploadFile==null) return new CommonResult(CommonStatus.FORBIDDEN,"文件上传不能为空");
         for (MultipartFile multipartFile : uploadFile) {
@@ -79,13 +84,29 @@ public class FileController {
                                  @ApiIgnore HttpServletResponse response,
                                  @RequestHeader String Authorization) throws IOException {
         MyFile file=fileService.getFileById(fileId);
-        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
-        if(userId!=file.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无下载权限");
-        FileInputStream fis=new FileInputStream(file.getFilePath());
-        response.setHeader("content-type",file.getContentType());
+        int userId = Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        if (userId != file.getUid()) return new CommonResult(CommonStatus.FORBIDDEN, "无下载权限");
+        String sendFilePath;
+        if(file.getContentType()==null){
+            String filePath=file.getFilePath();
+            filePath=filePath.substring(0,filePath.lastIndexOf("/"));
+            String zipFilePath= filePath+"/"+file.getFilename()+UUID.randomUUID().toString().substring(0,6)+".zip";
+            FileOutputStream fos = new FileOutputStream(zipFilePath);
+            ZipUtils.toZip(file.getFilePath(),fos,true);
+            sendFilePath=zipFilePath;
+        }else {
+            sendFilePath=file.getFilePath();
+        }
+        FileInputStream fis = new FileInputStream(sendFilePath);
+        response.setHeader("content-type", file.getContentType());
         response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
         sendFileToUser(response, fis);
-        return new CommonResult(CommonStatus.OK,"下载成功");
+        if(file.getContentType()==null){
+            File zipFile=new File(sendFilePath);
+            if(zipFile.exists()&&zipFile.delete())return new CommonResult(CommonStatus.OK,"下载成功");
+            else log.info("删除压缩文件异常，异常文件地址 ： "+sendFilePath);
+        }
+        return new CommonResult(CommonStatus.OK, "下载成功");
     }
 
     @ApiIgnore
@@ -154,14 +175,28 @@ public class FileController {
         return new CommonResult(CommonStatus.OK,"删除成功");
     }
 
-    @GetMapping("/images/{id}")
+    @GetMapping("/icon/{id}")
     @ApiOperation("传入用户id,得到用户头像")
-    public CommonResult image(@PathVariable("id")int id,
-                              @ApiIgnore HttpServletResponse response,
-                              @RequestHeader String Authorization) throws IOException {
+    public CommonResult getIcon(@PathVariable("id")int id,
+                                @ApiIgnore HttpServletResponse response,
+                                @RequestHeader String Authorization) throws IOException {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(userId!=id)return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         FileInputStream fis=new FileInputStream(FILE_STORE_PATH+"\\"+USER_ICON_FOLDER+"\\"+id+".jpg");
+        sendFileToUser(response, fis);
+        return new CommonResult(CommonStatus.OK,"查询成功");
+    }
+
+    @GetMapping("/images/{fileId}")
+    @ApiOperation("获取图片的预览,传入fileId")
+    public CommonResult getImage(@PathVariable("fileId")int fileId,
+                                 @ApiIgnore HttpServletResponse response,
+                                 @RequestHeader String Authorization) throws IOException {
+        MyFile myFile= fileService.getFileById(fileId);
+        if(myFile==null||myFile.getContentType().toLowerCase().startsWith("images/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        if(userId!= myFile.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+        FileInputStream fis=new FileInputStream(myFile.getFilePath());
         sendFileToUser(response, fis);
         return new CommonResult(CommonStatus.OK,"查询成功");
     }
@@ -206,7 +241,7 @@ public class FileController {
                                    int targetFileId,
                                    @RequestHeader String Authorization) throws IOException {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
-        fileService.copyFileTo(curFileId,targetFileId,userId);
-        return new CommonResult(CommonStatus.OK,"复制成功");
+        if(fileService.copyFileTo(curFileId,targetFileId,userId)) return new CommonResult(CommonStatus.OK,"复制成功");
+        return new CommonResult(CommonStatus.EXCEPTION,"复制异常");
     }
 }

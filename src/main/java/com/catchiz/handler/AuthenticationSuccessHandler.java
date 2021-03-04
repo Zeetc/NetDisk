@@ -1,8 +1,8 @@
 package com.catchiz.handler;
 
-import com.catchiz.domain.CommonResult;
-import com.catchiz.domain.CommonStatus;
-import com.catchiz.domain.User;
+import com.catchiz.pojo.CommonResult;
+import com.catchiz.pojo.CommonStatus;
+import com.catchiz.pojo.User;
 import com.catchiz.service.UserService;
 import com.catchiz.utils.JwtTokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,4 +1,4 @@
-package com.catchiz.domain;
+package com.catchiz.pojo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,8 +1,8 @@
 package com.catchiz.controller;
 
 
-import com.catchiz.domain.CommonResult;
-import com.catchiz.domain.CommonStatus;
+import com.catchiz.pojo.CommonResult;
+import com.catchiz.pojo.CommonStatus;
 import com.catchiz.service.UserService;
 import com.catchiz.utils.JwtTokenUtil;
 import io.jsonwebtoken.Claims;
@@ -13,9 +13,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

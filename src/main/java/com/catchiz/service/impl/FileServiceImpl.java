@@ -1,8 +1,8 @@
 package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
-import com.catchiz.domain.FileTree;
-import com.catchiz.domain.MyFile;
+import com.catchiz.pojo.FileTree;
+import com.catchiz.pojo.MyFile;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.service.FileService;
 import com.catchiz.utils.FileUtils;
@@ -181,14 +181,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void copyFileTo(int curFileId, int targetFileId,int uid) throws IOException {
+    public boolean copyFileTo(int curFileId, int targetFileId,int uid) throws IOException {
         MyFile originFile=fileMapper.getFileById(curFileId);
         String targetFilePath;
         if(targetFileId!=-1){
             MyFile targetFile=fileMapper.getFileById(targetFileId);
+            if(targetFile.getFilePath().startsWith(originFile.getFilePath()))return false;
             targetFilePath=targetFile.getFilePath();
         }else targetFilePath=FileController.FILE_STORE_PATH+"/"+uid;
         File origin=new File(originFile.getFilePath());
-        fileUtils.copyFileTo(origin,targetFilePath,uid,targetFileId);
+        return fileUtils.copyFileTo(origin,targetFilePath,uid,targetFileId);
     }
 }

@@ -1,7 +1,7 @@
 package com.catchiz.service;
 
-import com.catchiz.domain.FileTree;
-import com.catchiz.domain.MyFile;
+import com.catchiz.pojo.FileTree;
+import com.catchiz.pojo.MyFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -43,5 +43,5 @@ public interface FileService {
 
     List<MyFile> getFilesByFileTree(FileTree fileTree);
 
-    void copyFileTo(int curFileId, int targetFileId,int uid) throws IOException;
+    boolean copyFileTo(int curFileId, int targetFileId,int uid) throws IOException;
 }

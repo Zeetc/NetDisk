@@ -1,6 +1,6 @@
 package com.catchiz.service;
 
-import com.catchiz.domain.User;
+import com.catchiz.pojo.User;
 
 import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -12,8 +12,6 @@ public interface UserService {
     int register(User user) throws SQLIntegrityConstraintViolationException, IOException;
 
     boolean delUser(int userId);
-
-    User managerLogin(User user);
 
     boolean resetPassword(Integer userId,String password);
 

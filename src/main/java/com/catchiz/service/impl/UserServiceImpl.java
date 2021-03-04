@@ -1,7 +1,7 @@
 package com.catchiz.service.impl;
 
 import com.catchiz.controller.FileController;
-import com.catchiz.domain.User;
+import com.catchiz.pojo.User;
 import com.catchiz.mapper.FileMapper;
 import com.catchiz.mapper.UserMapper;
 import com.catchiz.service.UserService;
@@ -58,11 +58,6 @@ public class UserServiceImpl implements UserService {
         fileMapper.delFileByUser(userId);
         userMapper.delUser(userId);
         return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId)&&fileUtils.delUserIcon(userId);
-    }
-
-    @Override
-    public User managerLogin(User user) {
-        return userMapper.managerLogin(user);
     }
 
     @Override

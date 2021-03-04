@@ -1,7 +1,7 @@
 package com.catchiz.utils;
 
 import com.catchiz.controller.FileController;
-import com.catchiz.domain.MyFile;
+import com.catchiz.pojo.MyFile;
 import com.catchiz.mapper.FileMapper;
 import org.springframework.stereotype.Service;
 
@@ -74,14 +74,18 @@ public class FileUtils {
         if(!targetFile.exists()){
             if(!targetFile.mkdir())return false;
             MyFile myFile=constructMyFileByFile(targetFile,uid,pid);
-            if(fileMapper.getFileByPath(myFile.getFilePath())==null)fileMapper.storeFile(myFile);
+            if(fileMapper.getFileByPath(myFile.getFilePath())==null){
+                fileMapper.storeFile(myFile);
+            }
         }
         //如果source是文件夹，则在目的地址中创建新的文件夹
         if(source.isDirectory()){
             File file = new File(targetPath+"\\"+source.getName());//用目的地址加上source的文件夹名称，创建新的文件夹
             if(!file.mkdir())return false;
             MyFile myFile=constructMyFileByFile(file,uid,pid);
-            if(fileMapper.getFileByPath(myFile.getFilePath())==null)fileMapper.storeFile(myFile);
+            if(fileMapper.getFileByPath(myFile.getFilePath())==null){
+                fileMapper.storeFile(myFile);
+            }
             //得到source文件夹的所有文件及目录
             File[] files = source.listFiles();
             if(files==null||files.length==0){
@@ -114,8 +118,10 @@ public class FileUtils {
             //关闭资源
             fos.close();
             fis.close();
-            MyFile myFile=constructMyFileByFile(source,uid,pid);
-            if(fileMapper.getFileByPath(myFile.getFilePath())==null)fileMapper.storeFile(myFile);
+            MyFile myFile=constructMyFileByFile(curFile,uid,pid);
+            if(fileMapper.getFileByPath(myFile.getFilePath())==null){
+                fileMapper.storeFile(myFile);
+            }
         }
         return true;
     }
@@ -128,7 +134,7 @@ public class FileUtils {
                 file.length(),
                 1,
                 new Timestamp(System.currentTimeMillis()),
-                new MimetypesFileTypeMap().getContentType(file),
+                file.isDirectory() ? null : new MimetypesFileTypeMap().getContentType(file),
                 uid,
                 pid,
                 0

@@ -1,18 +1,13 @@
 package com.catchiz.controller;
 
-import com.catchiz.domain.*;
+import com.catchiz.pojo.*;
 import com.catchiz.service.FileService;
 import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -21,14 +16,11 @@ public class ManagerController {
     private final UserService userService;
     private final FileService fileService;
 
-    private final StringRedisTemplate redisTemplate;
-
     private static int PAGE_SIZE;
 
-    public ManagerController(UserService userService, FileService fileService, StringRedisTemplate redisTemplate) {
+    public ManagerController(UserService userService, FileService fileService) {
         this.userService = userService;
         this.fileService = fileService;
-        this.redisTemplate = redisTemplate;
     }
 
     @Value("${NetDisk.pageSize}")

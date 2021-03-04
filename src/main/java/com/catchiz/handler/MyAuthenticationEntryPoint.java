@@ -1,7 +1,7 @@
 package com.catchiz.handler;
 
-import com.catchiz.domain.CommonResult;
-import com.catchiz.domain.CommonStatus;
+import com.catchiz.pojo.CommonResult;
+import com.catchiz.pojo.CommonStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

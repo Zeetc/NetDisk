@@ -1,6 +1,6 @@
 package com.catchiz.mapper;
 
-import com.catchiz.domain.MyFile;
+import com.catchiz.pojo.MyFile;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 

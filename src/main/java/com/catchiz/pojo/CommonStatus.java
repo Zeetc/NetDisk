@@ -1,4 +1,4 @@
-package com.catchiz.domain;
+package com.catchiz.pojo;
 
 public class CommonStatus {
     public static int EXCEPTION=402;
