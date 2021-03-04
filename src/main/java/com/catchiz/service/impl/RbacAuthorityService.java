@@ -33,10 +33,9 @@ public class RbacAuthorityService {
     public boolean hasPermission(HttpServletRequest request) {
         log.info("current request is:" + request.getRequestURI());
         String token = request.getHeader("Authorization");
-        if(token!=null&&redisTemplate.opsForValue().get(token)!=null)return false;
+        if(token==null||redisTemplate.opsForValue().get(token)!=null)return false;
         Claims claims=JwtTokenUtil.getClaimsFromToken(token);
-        if(claims==null)return false;
-        if(claims.getExpiration().before(new Date()))return false;
+        if(claims==null||claims.getExpiration().before(new Date()))return false;
         String id=claims.getSubject();
         if(id==null||id.equals(""))return false;
         // 自定义登录规则，如果有userID就可以访问/file 和/user

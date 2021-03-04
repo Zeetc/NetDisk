@@ -85,7 +85,7 @@ public class ManagerController {
                                 @RequestParam(value = "curPage",required = false,defaultValue = "1")int curPage,
                                 @RequestParam(value = "fileName",required = false,defaultValue = "null")String fileName,
                                 @RequestParam(value = "pageCut",required = false,defaultValue = "true")boolean pageCut){
-        if(fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
+        if(pid!=-1&&fileService.getFileById(pid)==null)return new CommonResult(CommonStatus.NOTFOUND,"查询失败");
         List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,true,pageCut);
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
         int curPid=(pid==-1?-1:fileService.getCurPid(pid));
