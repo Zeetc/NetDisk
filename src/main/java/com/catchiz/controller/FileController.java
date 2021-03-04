@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -99,8 +100,9 @@ public class FileController {
         }
         FileInputStream fis = new FileInputStream(sendFilePath);
         response.setHeader("content-type", file.getContentType());
-        response.addHeader("Content-Disposition", "attachment;fileName=" + file.getFilename());
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getFilename(), "UTF-8"));
         sendFileToUser(response, fis);
+        fis.close();
         if(file.getContentType()==null){
             File zipFile=new File(sendFilePath);
             if(zipFile.exists()&&zipFile.delete())return new CommonResult(CommonStatus.OK,"下载成功");
