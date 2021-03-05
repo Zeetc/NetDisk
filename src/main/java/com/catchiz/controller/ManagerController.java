@@ -37,35 +37,38 @@ public class ManagerController {
 
     @DeleteMapping("/delUser/{userId}")
     @ApiOperation("删除用户")
-    public CommonResult delUser(@PathVariable("userId") int userId){
-        if(!userService.delUser(userId))return new CommonResult(CommonStatus.FORBIDDEN,"删除失败");
+    public CommonResult delUser(@PathVariable("userId") Integer userId){
+        if(userId==null||!userService.delUser(userId))return new CommonResult(CommonStatus.FORBIDDEN,"删除失败");
         return new CommonResult(CommonStatus.OK,"删除成功");
     }
 
     @DeleteMapping("/delFile")
     @ApiOperation("删除文件")
-    public CommonResult delFile(int fileId){
-        if(!fileService.delFile(fileId))return new CommonResult(CommonStatus.EXCEPTION,"删除失败");
+    public CommonResult delFile(Integer fileId){
+        if(fileId==null||!fileService.delFile(fileId))return new CommonResult(CommonStatus.EXCEPTION,"删除失败");
         return new CommonResult(CommonStatus.OK,"删除成功");
     }
 
     @PatchMapping("/changeFileValid")
     @ApiOperation("改变文件合法属性->false的话普通用户无法获取文件")
-    public CommonResult changeFileValid(int fileId, int isValidFile){
-        fileService.changeFileValid(fileId,isValidFile);
+    public CommonResult changeFileValid(Integer fileId, Boolean isValidFile){
+        if(fileId==null||isValidFile==null)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
+        fileService.changeFileValid(fileId, isValidFile);
         return new CommonResult(CommonStatus.OK,"修改文件属性成功");
     }
 
     @PatchMapping("/changeFileCheck")
     @ApiOperation("设置文件为已检查")
-    public CommonResult changeFileCheck(int fileId){
+    public CommonResult changeFileCheck(Integer fileId){
+        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id不能为空");
         fileService.setChecked(fileId);
         return new CommonResult(CommonStatus.OK,"修改文件属性成功");
     }
 
     @PatchMapping("/changeFileUnCheck")
     @ApiOperation("设置文件为未检查")
-    public CommonResult changeFileUnCheck(int fileId){
+    public CommonResult changeFileUnCheck(Integer fileId){
+        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id不能为空");
         fileService.setUnchecked(fileId);
         return new CommonResult(CommonStatus.OK,"修改文件属性成功");
     }
@@ -93,7 +96,8 @@ public class ManagerController {
 
     @GetMapping("/getAllFileByCheck")
     @ApiOperation("根据是否已经审核获取文件，check为1代表已审核，0为未审核")
-    public CommonResult getAllCheckedFile(@RequestParam int check){
+    public CommonResult getAllCheckedFile(@RequestParam Integer check){
+        if(check==null)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
         if(check==0)return new CommonResult(CommonStatus.OK,"查询成功",fileService.getAllUnCheckedFile());
         return new CommonResult(CommonStatus.OK,"查询成功",fileService.getAllCheckedFile());
     }

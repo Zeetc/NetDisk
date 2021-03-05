@@ -13,7 +13,7 @@ public interface FileService {
 
     boolean delFile(int fileId);
 
-    void changeFileValid(int fileId,int isValidFile);
+    void changeFileValid(int fileId,boolean isValidFile);
 
     MyFile getFileById(int fileId);
 

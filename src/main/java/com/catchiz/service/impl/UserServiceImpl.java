@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     public int register(User user) throws DataIntegrityViolationException, SQLIntegrityConstraintViolationException, IOException {
         user.setId(null);
         user.setRegisterDate(new Timestamp(System.currentTimeMillis()));
-        user.setIsManager(0);
+        user.setIsManager(false);
         userMapper.register(user);
         int userId=user.getId();
         File file=new File(FileController.FILE_STORE_PATH +"\\"+userId);
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean delUser(int userId) {
         User user=userMapper.getUserById(userId);
-        if(user.getIsManager()==1)return false;
+        if(user.getIsManager())return false;
         fileMapper.delFileByUser(userId);
         userMapper.delUser(userId);
         return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId)&&fileUtils.delUserIcon(userId);

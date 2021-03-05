@@ -36,7 +36,7 @@ public class SysUserDetailsService implements UserDetailsService {
         log.info("用户存在，用户:"+username);
         List<SimpleGrantedAuthority> userGrantedAuthorities = new ArrayList<>();
         userGrantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        if(user.getIsManager()==1)userGrantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if(user.getIsManager())userGrantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         //返回数据对象(手动已加密)
         User.UserBuilder userBuilder = User.withUsername(username);
         userBuilder.password(user.getPassword());

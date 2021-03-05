@@ -24,10 +24,11 @@ public class FileUtils {
         file.setFilename(foldName);
         file.setFilePath(path);
         file.setFileSize(0L);
-        file.setIsValidFile(1);
+        file.setIsValidFile(true);
         file.setUploadDate(new Timestamp(System.currentTimeMillis()));
         file.setUid(uid);
         file.setPid(pid);
+        file.setIsChecked(false);
         fileMapper.storeFile(file);
         return true;
     }
@@ -132,12 +133,12 @@ public class FileUtils {
                 file.getName(),
                 file.getPath().replace("\\","/"),
                 file.length(),
-                1,
+                true,
                 new Timestamp(System.currentTimeMillis()),
                 file.isDirectory() ? null : new MimetypesFileTypeMap().getContentType(file),
                 uid,
                 pid,
-                0
+                false
         );
     }
 }

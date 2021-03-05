@@ -96,6 +96,7 @@ public class AuthController {
     @ApiOperation("根据提供的Authorization获取验证码图片")
     public void getVerifyPic(HttpServletResponse response,
                              @RequestHeader String Authorization) throws IOException {
+        if(Authorization==null||Authorization.equals(""))return;
         int width = 100;
         int height = 30;
         int codeCount = 4;
@@ -161,7 +162,8 @@ public class AuthController {
 
     @GetMapping("/applyForFindPassword")
     @ApiOperation("申请找回密码")
-    public CommonResult applyForFindPassword(int userId){
+    public CommonResult applyForFindPassword(Integer userId){
+        if(userId==null)return new CommonResult(CommonStatus.FORBIDDEN,"用户id参数不能为空");
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         String uid=Integer.toString(userId);
         if(operations.get(uid)!=null)return new CommonResult(CommonStatus.FORBIDDEN,"频繁请求, 1分钟后再试");
@@ -183,14 +185,17 @@ public class AuthController {
 
     @PatchMapping("/resetPassword")
     @ApiOperation("修改账户密码")
-    public CommonResult resetPassword(@RequestParam("userId")int userId,
+    public CommonResult resetPassword(@RequestParam("userId")Integer userId,
                                       @RequestParam("password")String password,
-                                      @RequestParam("uuid")String uuid){
+                                      @RequestParam("verifyCode")String verifyCode){
+        if(userId==null||password==null||verifyCode==null||password.equals("")||verifyCode.equals("")){
+            return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
+        }
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        String uid=operations.get(uuid);
+        String uid=operations.get(verifyCode);
         if(uid==null)return new CommonResult(CommonStatus.FORBIDDEN,"非法参数");
         if(userId!=Integer.parseInt(uid))return new CommonResult(CommonStatus.FORBIDDEN,"没有权限");
-        redisTemplate.delete(uuid);
+        redisTemplate.delete(verifyCode);
         if(userService.resetPassword(userId,password)){
             return new CommonResult(CommonStatus.OK,"修改成功");
         }

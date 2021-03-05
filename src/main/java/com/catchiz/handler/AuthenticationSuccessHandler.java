@@ -35,7 +35,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         response.setContentType("application/json;charset=UTF-8");
         String username=authentication.getName();
         User user= userService.getUserById(Integer.parseInt(username));
-        String token = JwtTokenUtil.generateToken(username,user.getIsManager()==1);
+        String token = JwtTokenUtil.generateToken(username,user.getIsManager());
         user.setPassword(null);
         response.getWriter().write(objectMapper.writeValueAsString(new CommonResult(CommonStatus.OK,"登录成功", Arrays.asList(token,user))));
     }

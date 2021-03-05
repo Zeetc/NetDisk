@@ -40,9 +40,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void changeFileValid(int fileId,int isValidFile) {
-        fileMapper.changeFileValid(fileId,isValidFile==1?0:1);
-        fileMapper.changeCheck(fileId,1);
+    public void changeFileValid(int fileId,boolean isValidFile) {
+        fileMapper.changeFileValid(fileId,isValidFile);
+        fileMapper.changeCheck(fileId,true);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class FileServiceImpl implements FileService {
                 File temp=new File(prePath);
                 if(!temp.mkdir())return false;
                 //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
-                dynamicConstructMyFile(myFile,dirs[i],prePath,0,1,null, userId, dynamicPid);
+                dynamicConstructMyFile(myFile,dirs[i],prePath,0,true,null, userId, dynamicPid);
                 storeFile(myFile);
             }
             dynamicPid=myFile.getFileId();
@@ -108,32 +108,32 @@ public class FileServiceImpl implements FileService {
         multipartFile.transferTo(new File(path));
         MyFile file=new MyFile();
         //TODO 默认为0，代表非法资源，需审核，试验期间暂为1
-        dynamicConstructMyFile(file,dirs[dirs.length-1],path, multipartFile.getSize(), 1,multipartFile.getContentType(), userId, dynamicPid);
+        dynamicConstructMyFile(file,dirs[dirs.length-1],path, multipartFile.getSize(), true,multipartFile.getContentType(), userId, dynamicPid);
         storeFile(file);
         return true;
     }
 
     @Override
     public void setChecked(int fileId) {
-        fileMapper.changeCheck(fileId,1);
+        fileMapper.changeCheck(fileId,true);
     }
 
     @Override
     public void setUnchecked(int fileId) {
-        fileMapper.changeCheck(fileId,0);
+        fileMapper.changeCheck(fileId,false);
     }
 
     @Override
     public List<MyFile> getAllCheckedFile(){
-        return fileMapper.getAllFileByCheck(1);
+        return fileMapper.getAllFileByCheck(true);
     }
 
     @Override
     public List<MyFile> getAllUnCheckedFile(){
-        return fileMapper.getAllFileByCheck(0);
+        return fileMapper.getAllFileByCheck(false);
     }
 
-    public void dynamicConstructMyFile(MyFile myFile,String fileName,String filePath,long fileSize,int isValidFile,String contentType,int uid,int pid){
+    public void dynamicConstructMyFile(MyFile myFile,String fileName,String filePath,long fileSize,boolean isValidFile,String contentType,int uid,int pid){
         if(fileName!=null)myFile.setFilename(fileName);
         if(filePath!=null)myFile.setFilePath(filePath);
         if(fileSize!=0)myFile.setFileSize(fileSize);
@@ -142,6 +142,7 @@ public class FileServiceImpl implements FileService {
         if(contentType!=null)myFile.setContentType(contentType);
         myFile.setUid(uid);
         myFile.setPid(pid);
+        myFile.setIsChecked(false);
     }
 
     @Override

@@ -20,6 +20,6 @@ public class User {
     private Timestamp registerDate;
 
     @ApiModelProperty(hidden = true)
-    private int isManager;
+    private Boolean isManager;
 
 }

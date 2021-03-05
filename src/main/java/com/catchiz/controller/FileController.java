@@ -53,6 +53,7 @@ public class FileController {
     public void setFileStorePath(String fileStorePath) {
         FileController.FILE_STORE_PATH = fileStorePath;
     }
+
     @Value("${NetDisk.pageSize}")
     public void setPageSize(int pageSize){
         FileController.PAGE_SIZE = pageSize;
@@ -81,12 +82,13 @@ public class FileController {
 
     @GetMapping("/download")
     @ApiOperation("用户下载文件")
-    public CommonResult download(@RequestParam("fileId") int fileId,
+    public CommonResult download(@RequestParam("fileId") Integer fileId,
                                  @ApiIgnore HttpServletResponse response,
                                  @RequestHeader String Authorization) throws IOException {
+        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件ID不能为空");
         MyFile file=fileService.getFileById(fileId);
         int userId = Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
-        if (userId != file.getUid()) return new CommonResult(CommonStatus.FORBIDDEN, "无下载权限");
+        if (userId != file.getUid()||!file.getIsValidFile()) return new CommonResult(CommonStatus.FORBIDDEN, "无下载权限");
         String sendFilePath;
         if(file.getContentType()==null){
             String filePath=file.getFilePath();
@@ -179,9 +181,10 @@ public class FileController {
 
     @GetMapping("/icon/{id}")
     @ApiOperation("传入用户id,得到用户头像")
-    public CommonResult getIcon(@PathVariable("id")int id,
+    public CommonResult getIcon(@PathVariable("id")Integer id,
                                 @ApiIgnore HttpServletResponse response,
                                 @RequestHeader String Authorization) throws IOException {
+        if(id==null)return new CommonResult(CommonStatus.FORBIDDEN,"用户id参数不能为空");
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(userId!=id)return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         FileInputStream fis=new FileInputStream(FILE_STORE_PATH+"\\"+USER_ICON_FOLDER+"\\"+id+".jpg");
@@ -191,9 +194,10 @@ public class FileController {
 
     @GetMapping("/images/{fileId}")
     @ApiOperation("获取图片的预览,传入fileId")
-    public CommonResult getImage(@PathVariable("fileId")int fileId,
+    public CommonResult getImage(@PathVariable("fileId")Integer fileId,
                                  @ApiIgnore HttpServletResponse response,
                                  @RequestHeader String Authorization) throws IOException {
+        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         MyFile myFile= fileService.getFileById(fileId);
         if(myFile==null||myFile.getContentType().toLowerCase().startsWith("images/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
@@ -207,7 +211,7 @@ public class FileController {
     @ApiOperation("更换头像，需要上传一张jpg图片")
     public CommonResult updateIcon(MultipartFile multipartFile,
                                    @RequestHeader String Authorization) throws IOException {
-        if(multipartFile.isEmpty()||multipartFile.getContentType()==null)return new CommonResult(CommonStatus.FORBIDDEN,"无效文件");
+        if(multipartFile==null||multipartFile.isEmpty()||multipartFile.getContentType()==null)return new CommonResult(CommonStatus.FORBIDDEN,"无效文件");
         if(!multipartFile.getContentType().toLowerCase().startsWith("image/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许上传图片类型");
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         multipartFile.transferTo(Paths.get(FILE_STORE_PATH + "\\" + USER_ICON_FOLDER + "\\" + userId + ".jpg"));
@@ -217,6 +221,7 @@ public class FileController {
     @GetMapping("/share")
     @ApiOperation("分享文件，会返回一个链接地址，以及一个提取码，分享文件有效期3天")
     public CommonResult shareFiles(int[] file) throws JsonProcessingException {
+        if(file==null||file.length==0)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         FileTree fileTree=fileService.getFileTree(file);
         String uuid= UUID.randomUUID().toString();
         String verifyCode=uuid.substring(0,4);
@@ -228,6 +233,7 @@ public class FileController {
     @GetMapping("/getShare")
     @ApiOperation("获取分享的文件，需要输入正确的链接和提取码")
     public CommonResult getShare(String uuid,String verifyCode,String path) throws JsonProcessingException {
+        if(uuid==null||verifyCode==null)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         String val = operations.get(uuid + verifyCode);
         if (val == null) return new CommonResult(CommonStatus.FORBIDDEN, "错误的分享链接");
@@ -239,9 +245,10 @@ public class FileController {
 
     @PostMapping("/copyFileTo")
     @ApiOperation("复制文件到另一个文件夹，需要当前文件的文件id，和目标文件的id，如果想复制到根目录下，目标文件的id是-1")
-    public CommonResult copyFileTo(int curFileId,
-                                   int targetFileId,
+    public CommonResult copyFileTo(Integer curFileId,
+                                   Integer targetFileId,
                                    @RequestHeader String Authorization) throws IOException {
+        if(curFileId==null||targetFileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(fileService.copyFileTo(curFileId,targetFileId,userId)) return new CommonResult(CommonStatus.OK,"复制成功");
         return new CommonResult(CommonStatus.EXCEPTION,"复制异常");

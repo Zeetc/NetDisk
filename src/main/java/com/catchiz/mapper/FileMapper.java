@@ -23,7 +23,7 @@ public interface FileMapper {
     void delFile(int fileId);
 
     @Update("update file set isValidFile = #{isValidFile} where fileId = #{fileId}")
-    void changeFileValid(@Param("fileId") int fileId,@Param("isValidFile") int isValidFile);
+    void changeFileValid(@Param("fileId") int fileId,@Param("isValidFile") boolean isValidFile);
 
     @Select("select * from file where fileId = #{fileId}")
     MyFile getFileById(int fileId);
@@ -87,9 +87,9 @@ public interface FileMapper {
     String getFilenameById(int fileId);
 
     @Update("update file set isChecked = #{isChecked} where fileId = #{fileId}")
-    void changeCheck(@Param("fileId") int fileId,@Param("isChecked") int isChecked);
+    void changeCheck(@Param("fileId") int fileId,@Param("isChecked") boolean isChecked);
 
     @Select("select * from file where isChecked = #{isChecked}")
-    List<MyFile> getAllFileByCheck(int isChecked);
+    List<MyFile> getAllFileByCheck(boolean isChecked);
 
 }

@@ -23,7 +23,7 @@ public class MyFile {
     private long fileSize;
 
     @ApiModelProperty(hidden = true)
-    private Integer isValidFile;
+    private Boolean isValidFile;
 
     @ApiModelProperty(hidden = true)
     private Timestamp uploadDate;
@@ -35,6 +35,6 @@ public class MyFile {
 
     private Integer pid;
 
-    private int isChecked;
+    private Boolean isChecked;
 
 }
