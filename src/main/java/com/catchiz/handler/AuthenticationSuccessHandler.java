@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Slf4j
 @Component("authenticationSuccessHandler")
@@ -35,6 +36,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         String username=authentication.getName();
         User user= userService.getUserById(Integer.parseInt(username));
         String token = JwtTokenUtil.generateToken(username,user.getIsManager()==1);
-        response.getWriter().write(objectMapper.writeValueAsString(new CommonResult(CommonStatus.OK,"登录成功",token)));
+        user.setPassword(null);
+        response.getWriter().write(objectMapper.writeValueAsString(new CommonResult(CommonStatus.OK,"登录成功", Arrays.asList(token,user))));
     }
 }

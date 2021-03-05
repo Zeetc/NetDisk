@@ -23,7 +23,13 @@ public class SysUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if(username.equals(""))throw new UsernameNotFoundException("用户ID不合法！");
-        com.catchiz.pojo.User user = userService.getUserById(Integer.parseInt(username));
+        int userId;
+        try{
+            userId= Integer.parseInt(username);
+        }catch (NumberFormatException e){
+            throw new UsernameNotFoundException("用户ID不合法！");
+        }
+        com.catchiz.pojo.User user = userService.getUserById(userId);
         if (user == null){
             throw new UsernameNotFoundException("用户不存在！");
         }

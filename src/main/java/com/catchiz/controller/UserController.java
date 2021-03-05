@@ -43,6 +43,13 @@ public class UserController {
         return new CommonResult(CommonStatus.OK,"退出成功");
     }
 
+    @GetMapping("/getUserInfo")
+    @ApiOperation("获取用户信息")
+    public CommonResult getUserInfo(@RequestHeader String Authorization){
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        return new CommonResult(CommonStatus.OK,"查询成功",userService.getUserById(userId));
+    }
+
     @GetMapping("/refreshToken")
     @ApiOperation("刷新token")
     public CommonResult refreshToken(@RequestHeader String Authorization){

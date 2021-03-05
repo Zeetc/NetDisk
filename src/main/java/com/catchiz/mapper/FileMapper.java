@@ -9,7 +9,7 @@ import java.util.List;
 @Component("fileMapper")
 public interface FileMapper {
     @Insert("insert into file values(#{fileId},#{filename},#{filePath},#{fileSize},\n" +
-            "                        #{isValidFile},#{uploadDate},#{contentType},#{uid},#{pid},#{check})")
+            "                        #{isValidFile},#{uploadDate},#{contentType},#{uid},#{pid},#{isChecked})")
     @Options(useGeneratedKeys = true,keyColumn = "fileId",keyProperty = "fileId")
     void storeFile(MyFile file);
 
@@ -39,7 +39,7 @@ public interface FileMapper {
 
     @Select({
             "<script>" ,
-            "select * from file where pid = #{pid} and uid = #{userId}\n" +
+            "select fileId,filename,fileSize,uploadDate,contentType,uid,pid from file where pid = #{pid} and uid = #{userId}\n" +
                     "        <if test=\"fileName!=null and '%null%'!=fileName\">\n" +
                     "            and fileName like #{fileName}\n" +
                     "        </if>\n" +
@@ -48,6 +48,15 @@ public interface FileMapper {
                     "        </if>\n" +
                     "        <if test=\"pageCut\"> limit #{start} , #{pageSize} </if>",
             "</script>"
+    })
+    @Results({
+            @Result(id = true, column = "fileId", property = "fileId"),
+            @Result(column = "filename", property = "filename"),
+            @Result(column = "fileSize", property = "fileSize"),
+            @Result(column = "uploadDate", property = "uploadDate"),
+            @Result(column = "contentType", property = "contentType"),
+            @Result(column = "uid", property = "uid"),
+            @Result(column = "pid", property = "pid")
     })
     List<MyFile> findByInfo(@Param("pid") int pid,
                             @Param("userId") int userId,
@@ -77,10 +86,10 @@ public interface FileMapper {
     @Select("select fileName from file where fileId = #{fileId}")
     String getFilenameById(int fileId);
 
-    @Update("update file set check = #{check} where fileId = #{fileId}")
-    void changeCheck(@Param("fileId") int fileId,@Param("check") int check);
+    @Update("update file set isChecked = #{isChecked} where fileId = #{fileId}")
+    void changeCheck(@Param("fileId") int fileId,@Param("isChecked") int isChecked);
 
-    @Select("select * from file where check = #{check}")
-    List<MyFile> getAllFileByCheck(int check);
+    @Select("select * from file where isChecked = #{isChecked}")
+    List<MyFile> getAllFileByCheck(int isChecked);
 
 }
