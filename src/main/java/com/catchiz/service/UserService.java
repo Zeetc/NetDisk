@@ -24,4 +24,6 @@ public interface UserService {
     boolean resetEmail(int userId, String email);
 
     boolean resetUsername(int userId, String username);
+
+    int checkPassword(int userId, String password);
 }

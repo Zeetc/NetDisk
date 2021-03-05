@@ -58,45 +58,7 @@ public class UserController {
         return new CommonResult(CommonStatus.OK,"刷新认证成功",JwtTokenUtil.generateToken(claims.getSubject(),(boolean) claims.get("isManager")));
     }
 
-    @GetMapping("/applyForResetPassword")
-    @ApiOperation("申请修改密码")
-    public CommonResult applyForResetPassword(@RequestHeader String Authorization){
-        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
-        ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        String uid=Integer.toString(userId);
-        if(operations.get(uid)!=null)return new CommonResult(CommonStatus.FORBIDDEN,"频繁请求, 1分钟后再试");
-        String uuid= UUID.randomUUID().toString().substring(0,6);
-        operations.set(uuid, uid,24, TimeUnit.HOURS);
-        operations.set(uid,uid,1, TimeUnit.MINUTES);
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(emailSendUser);
-        message.setTo(userService.getEmailById(userId));
-        message.setSubject("网盘修改密码邮箱验证");
-        message.setText("验证码是："+uuid);
-        try {
-            mailSender.send(message);
-        } catch (Exception e) {
-            return new CommonResult(CommonStatus.EXCEPTION,"邮箱发送失败");
-        }
-        return new CommonResult(CommonStatus.OK,"申请成功");
-    }
 
-    @PatchMapping("/resetPassword")
-    @ApiOperation("修改账户密码")
-    public CommonResult resetPassword(@RequestParam("password")String password,
-                                      @RequestParam("uuid")String uuid,
-                                      @RequestHeader String Authorization){
-        ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        String uid=operations.get(uuid);
-        if(uid==null)return new CommonResult(CommonStatus.FORBIDDEN,"非法参数");
-        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
-        if(userId!=Integer.parseInt(uid))return new CommonResult(CommonStatus.FORBIDDEN,"没有权限");
-        redisTemplate.delete(uuid);
-        if(userService.resetPassword(userId,password)){
-            return new CommonResult(CommonStatus.OK,"修改成功");
-        }
-        return new CommonResult(CommonStatus.EXCEPTION,"修改失败");
-    }
 
     @PatchMapping("/resetEmail/{email}")
     @ApiOperation("修改账户邮箱")
@@ -125,6 +87,26 @@ public class UserController {
     public CommonResult checkEmailExist(@PathVariable("email")String email){
         if(userService.checkEmailExist(email))return new CommonResult(CommonStatus.FORBIDDEN,"邮箱已存在");
         return new CommonResult(CommonStatus.OK,"邮箱合法");
+    }
+
+    @PatchMapping("/applyForResetPassword")
+    @ApiOperation("修改密码")
+    public CommonResult applyForResetPassword(@RequestHeader String Authorization,
+                                              @RequestParam("originPassword")String originPassword,
+                                              @RequestParam("password")String password){
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        if(userService.checkPassword(userId,originPassword)!=1)return new CommonResult(CommonStatus.FORBIDDEN,"原密码错误");
+        userService.resetPassword(userId,password);
+        return new CommonResult(CommonStatus.OK,"修改成功");
+    }
+
+    @GetMapping("/checkPassword")
+    @ApiOperation("检查密码是否是原密码")
+    public CommonResult checkPassword(@RequestHeader String Authorization,
+                                      @RequestParam("password")String password){
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        int result=userService.checkPassword(userId,password);
+        return new CommonResult(CommonStatus.OK,"查询成功",result==1);
     }
 
 }

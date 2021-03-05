@@ -5,9 +5,12 @@ import com.catchiz.pojo.CommonStatus;
 import com.catchiz.pojo.User;
 import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
@@ -29,8 +32,14 @@ public class AuthController {
 
     private final UserService userService;
 
-    public AuthController(UserService userService, StringRedisTemplate redisTemplate) {
+    private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String emailSendUser;
+
+    public AuthController(UserService userService, JavaMailSender mailSender, StringRedisTemplate redisTemplate) {
         this.userService = userService;
+        this.mailSender = mailSender;
         this.redisTemplate = redisTemplate;
     }
 
@@ -148,5 +157,43 @@ public class AuthController {
         ServletOutputStream sos = response.getOutputStream();
         ImageIO.write(buffImg, "jpeg", sos);
         sos.close();
+    }
+
+    @GetMapping("/applyForFindPassword")
+    @ApiOperation("申请找回密码")
+    public CommonResult applyForFindPassword(int userId){
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        String uid=Integer.toString(userId);
+        if(operations.get(uid)!=null)return new CommonResult(CommonStatus.FORBIDDEN,"频繁请求, 1分钟后再试");
+        String uuid= UUID.randomUUID().toString().substring(0,6);
+        operations.set(uuid, uid,24, TimeUnit.HOURS);
+        operations.set(uid,uid,1, TimeUnit.MINUTES);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(emailSendUser);
+        message.setTo(userService.getEmailById(userId));
+        message.setSubject("网盘修改密码邮箱验证");
+        message.setText("验证码是："+uuid);
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            return new CommonResult(CommonStatus.EXCEPTION,"邮箱发送失败");
+        }
+        return new CommonResult(CommonStatus.OK,"申请成功");
+    }
+
+    @PatchMapping("/resetPassword")
+    @ApiOperation("修改账户密码")
+    public CommonResult resetPassword(@RequestParam("userId")int userId,
+                                      @RequestParam("password")String password,
+                                      @RequestParam("uuid")String uuid){
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        String uid=operations.get(uuid);
+        if(uid==null)return new CommonResult(CommonStatus.FORBIDDEN,"非法参数");
+        if(userId!=Integer.parseInt(uid))return new CommonResult(CommonStatus.FORBIDDEN,"没有权限");
+        redisTemplate.delete(uuid);
+        if(userService.resetPassword(userId,password)){
+            return new CommonResult(CommonStatus.OK,"修改成功");
+        }
+        return new CommonResult(CommonStatus.EXCEPTION,"修改失败");
     }
 }

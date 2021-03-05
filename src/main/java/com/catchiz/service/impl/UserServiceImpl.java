@@ -93,4 +93,9 @@ public class UserServiceImpl implements UserService {
         return userMapper.resetUsername(userId,username)==1;
     }
 
+    @Override
+    public int checkPassword(int userId, String password) {
+        return userMapper.checkPassword(userId,password);
+    }
+
 }

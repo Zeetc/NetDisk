@@ -36,4 +36,7 @@ public interface UserMapper {
 
     @Select("select email from user where id = #{id}")
     String getEmailById(int id);
+
+    @Select("select count(*) from user where id = #{userId} ans password = #{password}")
+    int checkPassword(@Param("userId") int userId, @Param("password") String password);
 }
