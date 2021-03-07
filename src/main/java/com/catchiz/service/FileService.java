@@ -44,4 +44,6 @@ public interface FileService {
     List<MyFile> getFilesByFileTree(FileTree fileTree);
 
     boolean copyFileTo(int curFileId, int targetFileId,int uid) throws IOException;
+
+    boolean renameFile(Integer fileId, String newName,String originFilePath,String newPath);
 }

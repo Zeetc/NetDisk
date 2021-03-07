@@ -193,4 +193,11 @@ public class FileServiceImpl implements FileService {
         File origin=new File(originFile.getFilePath());
         return fileUtils.copyFileTo(origin,targetFilePath,uid,targetFileId);
     }
+
+    @Override
+    public boolean renameFile(Integer fileId, String newName,String originFilePath,String newPath) {
+        fileMapper.renameFile(fileId,newName);
+        fileMapper.renameFilePath(fileId,newPath);
+        return fileUtils.renameFile(originFilePath,newPath);
+    }
 }

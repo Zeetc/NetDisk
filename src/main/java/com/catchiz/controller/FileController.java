@@ -253,4 +253,28 @@ public class FileController {
         if(fileService.copyFileTo(curFileId,targetFileId,userId)) return new CommonResult(CommonStatus.OK,"复制成功");
         return new CommonResult(CommonStatus.EXCEPTION,"复制异常");
     }
+
+    @PatchMapping("/renameFile")
+    @ApiOperation("更改文件名称，需要参数：要更改的文件Id，新文件名")
+    public CommonResult renameFile(Integer fileId,String newName,@RequestHeader String Authorization){
+        if(fileId==null||newName==null||newName.equals("")||fileId==-1)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        MyFile myFile=fileService.getFileById(fileId);
+        if(myFile==null)return new CommonResult(CommonStatus.NOTFOUND,"未找到文件");
+        if(newName.equals(myFile.getFilename()))return new CommonResult(CommonStatus.FORBIDDEN,"新名字与原名字相同");
+        List<MyFile> list=fileService.findByInfo(myFile.getPid(),userId,1,PAGE_SIZE,newName,false,false);
+        if(myFile.getUid()!=userId)return new CommonResult(CommonStatus.FORBIDDEN,"没有权限");
+        for (MyFile file : list) {
+            if(!file.getFileId().equals(fileId) &&file.getFilename().equals(newName)){
+                return new CommonResult(CommonStatus.FORBIDDEN,"当前文件夹下有重名文件");
+            }
+        }
+        String originFilePath=myFile.getFilePath();
+        int lastPartition=originFilePath.lastIndexOf("/");
+        if(lastPartition==-1)return new CommonResult(CommonStatus.EXCEPTION,"更改失败");
+        String newPath=originFilePath.substring(0,lastPartition+1)+newName;
+        boolean flag=fileService.renameFile(fileId,newName, myFile.getFilePath(),newPath);
+        if(flag) return new CommonResult(CommonStatus.OK,"更改成功");
+        return new CommonResult(CommonStatus.EXCEPTION,"更改失败");
+    }
 }

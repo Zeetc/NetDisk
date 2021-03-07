@@ -141,4 +141,9 @@ public class FileUtils {
                 false
         );
     }
+
+    public boolean renameFile(String originFilePath, String newPath) {
+        File file=new File(originFilePath);
+        return file.renameTo(new File(newPath));
+    }
 }

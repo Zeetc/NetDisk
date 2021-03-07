@@ -92,4 +92,10 @@ public interface FileMapper {
     @Select("select * from file where isChecked = #{isChecked}")
     List<MyFile> getAllFileByCheck(boolean isChecked);
 
+    @Update("update file set filename = #{newName} where fileId = #{fileId}")
+    void renameFile(@Param("fileId") int fileId,
+                    @Param("newName") String newName);
+
+    @Update("update file set filePath = #{filePath} where fileId = #{fileId}")
+    void renameFilePath(@Param("fileId")int fileId,@Param("filePath")String filePath);
 }
