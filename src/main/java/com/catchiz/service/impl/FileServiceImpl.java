@@ -176,7 +176,8 @@ public class FileServiceImpl implements FileService {
         Map<String,FileTree> childFiles =fileTree.getChildFiles();
         for (Map.Entry<String, FileTree> entry : childFiles.entrySet()) {
             FileTree child=entry.getValue();
-            list.add(fileMapper.getFileById(child.getFileId()));
+            MyFile myFile=fileMapper.getFileById(child.getFileId());
+            if(myFile!=null)list.add(myFile);
         }
         return list;
     }

@@ -84,7 +84,7 @@ public class ManagerController {
         List<MyFile> myFileList=fileService.findByInfo(pid,userId,curPage,PAGE_SIZE,fileName,true,pageCut);
         int totalCount=fileService.findCountByInfo(pid,userId,fileName,false);
         int curPid=(pid==-1?-1:fileService.getCurPid(pid));
-        return FileController.getCommonResult(curPid, curPage, fileName, userId, myFileList, totalCount, PAGE_SIZE);
+        return FileController.packPageBean(curPid, curPage, fileName, userId, myFileList, totalCount, PAGE_SIZE);
     }
 
     @GetMapping("/parentFile")
