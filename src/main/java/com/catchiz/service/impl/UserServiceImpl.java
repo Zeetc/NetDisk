@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         if(user.getIsManager())return false;
         fileMapper.delFileByUser(userId);
         userMapper.delUser(userId);
-        return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId)&&fileUtils.delUserIcon(userId);
+        return fileUtils.delFile(FileController.FILE_STORE_PATH +"\\"+userId,false)&&fileUtils.delUserIcon(userId);
     }
 
     @Override

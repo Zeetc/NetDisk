@@ -2,9 +2,9 @@ package com.catchiz.controller;
 
 import com.catchiz.pojo.*;
 import com.catchiz.service.FileService;
+import com.catchiz.utils.FileUtils;
 import com.catchiz.utils.JwtTokenUtil;
 import com.catchiz.utils.ZipUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -35,15 +36,19 @@ public class FileController {
     public static String FILE_STORE_PATH;
     private static int PAGE_SIZE;
     public static String USER_ICON_FOLDER;
+    public static String SHARE_FOLD;
 
     private final FileService fileService;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
-    public FileController(FileService fileService, StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+    private final FileUtils fileUtils;
+
+    public FileController(FileService fileService, StringRedisTemplate redisTemplate, ObjectMapper objectMapper, FileUtils fileUtils) {
         this.fileService = fileService;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
+        this.fileUtils = fileUtils;
     }
 
     @Value("${NetDisk.fileStorePath}")
@@ -59,6 +64,11 @@ public class FileController {
     @Value("${NetDisk.userIconFolder}")
     public void setUserIconFolder(String iconFolder){
         FileController.USER_ICON_FOLDER = iconFolder;
+    }
+
+    @Value("${NetDisk.shareFolder}")
+    public void setShareFold(String shareFold){
+        FileController.SHARE_FOLD = shareFold;
     }
 
     @PostMapping("/upload")
@@ -222,37 +232,46 @@ public class FileController {
 
     @GetMapping("/share")
     @ApiOperation("分享文件，会返回一个链接地址，以及一个提取码，分享文件有效期3天")
-    public CommonResult shareFiles(int[] file) throws JsonProcessingException {
+    public CommonResult shareFiles(int[] file) throws IOException {
         if(file==null||file.length==0)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         FileTree fileTree=fileService.getFileTree(file);
         String uuid= UUID.randomUUID().toString();
         String verifyCode=uuid.substring(0,4);
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         operations.set(uuid+verifyCode,objectMapper.writeValueAsString(fileTree),3,TimeUnit.DAYS);
+        boolean flag=fileService.createShareFolder(FILE_STORE_PATH+"/"+SHARE_FOLD+"/"+uuid+verifyCode,file);
+        if(!flag){
+            redisTemplate.delete(uuid+verifyCode);
+            fileUtils.delFile(FILE_STORE_PATH+"/"+SHARE_FOLD+"/"+uuid+verifyCode,true);
+            return new CommonResult(CommonStatus.EXCEPTION,"分享失败");
+        }
         return new CommonResult(CommonStatus.OK,"分享成功", Arrays.asList(uuid,verifyCode));
     }
 
     @GetMapping("/getShare")
-    @ApiOperation("获取分享的文件，需要输入正确的链接和提取码,wantDownload表示是否需要下载该文件")
+    @ApiOperation("获取分享的文件，需要输入正确的链接和提取码,wantDownload表示是否需要下载该文件,默认是false，需要下载再传")
     public CommonResult getShare(String uuid,String verifyCode, String path,
                                  @RequestParam(value = "wantDownload",required = false,defaultValue = "false") Boolean wantDownload,
-                                 @RequestParam(value = "fileId",required = false)Integer fileId,
                                  @ApiIgnore HttpServletResponse response) throws IOException {
         if(uuid==null||verifyCode==null)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         String val = operations.get(uuid + verifyCode);
         if (val == null) return new CommonResult(CommonStatus.FORBIDDEN, "错误的分享链接");
         FileTree fileTree = objectMapper.readValue(val, FileTree.class);
-        String[] paths = path.split("/");
-        List<MyFile> files = fileService.getFilesByFileTree(fileTree.search(paths,fileTree));
-        if(!wantDownload)return new CommonResult(CommonStatus.OK, "查询成功", files);
-        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
-        for (MyFile file : files) {
-            if(file.getFileId().equals(fileId)){
-                return sendFileToUser(response, file);
-            }
+        if(path!=null&&!path.equals("")){
+            String[] paths = path.split("/");
+            fileTree=fileTree.search(paths,fileTree);
         }
-        return new CommonResult(CommonStatus.NOTFOUND,"该文件夹下未找到文件");
+        if(fileTree==null)return new CommonResult(CommonStatus.NOTFOUND,"错误的文件路径");
+        List<MyFile> files = fileService.getFilesByFileTree(fileTree);
+        if(!wantDownload)return new CommonResult(CommonStatus.OK, "查询成功", files);
+        File file=new File(FILE_STORE_PATH+"/"+SHARE_FOLD+"/"+uuid+verifyCode+"/"+path);
+        if(!file.exists())return new CommonResult(CommonStatus.NOTFOUND,"该文件夹下未找到文件");
+        MyFile myFile=new MyFile();
+        myFile.setFilePath(FILE_STORE_PATH+"/"+SHARE_FOLD+"/"+uuid+verifyCode+"/"+path);
+        myFile.setFilename(file.getName());
+        myFile.setContentType(file.isDirectory()?null:new MimetypesFileTypeMap().getContentType(file));
+        return sendFileToUser(response,myFile);
     }
 
     @PostMapping("/copyFileTo")

@@ -46,4 +46,6 @@ public interface FileService {
     boolean copyFileTo(int curFileId, int targetFileId,int uid) throws IOException;
 
     boolean renameFile(Integer fileId, String newName,String originFilePath,String newPath);
+
+    boolean createShareFolder(String s, int[] file) throws IOException;
 }

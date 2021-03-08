@@ -33,23 +33,23 @@ public class FileUtils {
         return true;
     }
 
-    public boolean delFile(String filePath){
+    public boolean delFile(String filePath,boolean isShare){
         File file=new File(filePath);
-        return delFileRecur(file);
+        return delFileRecur(file,isShare);
     }
 
-    public boolean delFileRecur(File file) throws NullPointerException{
+    public boolean delFileRecur(File file,boolean isShare) throws NullPointerException{
         if(!file.isDirectory()){
-            fileMapper.delFileByPath(file.getPath().replace("\\","/"));
+            if(!isShare)fileMapper.delFileByPath(file.getPath().replace("\\","/"));
             return file.delete();
         }
         File[] files=file.listFiles();
         if (files != null) {
             for (File subFile : files) {
-                delFileRecur(subFile);
+                delFileRecur(subFile,isShare);
             }
         }
-        fileMapper.delFileByPath(file.getPath().replace("\\","/"));
+        if(!isShare)fileMapper.delFileByPath(file.getPath().replace("\\","/"));
         return file.delete();
     }
 
@@ -102,28 +102,34 @@ public class FileUtils {
             FileInputStream fis = new FileInputStream(source);
             //创建新的文件，保存复制内容，文件名称与源文件名称一致
             File curFile = new File(targetPath+"\\"+source.getName());
-            if(!curFile.exists()&&!curFile.createNewFile()){
-                return false;
-            }
-            FileOutputStream fos = new FileOutputStream(curFile);
-            // 读写数据
-            // 定义数组
-            byte[] b = new byte[1024];
-            // 定义长度
-            int len;
-            // 循环读取
-            while ((len = fis.read(b))!=-1) {
-                // 写出数据
-                fos.write(b, 0 , len);
-            }
-            //关闭资源
-            fos.close();
-            fis.close();
+            if(!copyFile(curFile,fis))return false;
             MyFile myFile=constructMyFileByFile(curFile,uid,pid);
             if(fileMapper.getFileByPath(myFile.getFilePath())==null){
                 fileMapper.storeFile(myFile);
             }
         }
+        return true;
+    }
+
+    public boolean copyFile(File curFile,FileInputStream fis) throws IOException {
+        if(!curFile.exists()&&!curFile.createNewFile()){
+            return false;
+        }
+        FileOutputStream fos = new FileOutputStream(curFile);
+        // 读写数据
+        // 定义数组
+        byte[] b = new byte[1024];
+        // 定义长度
+        int len;
+        // 循环读取
+        while ((len = fis.read(b))!=-1) {
+            // 写出数据
+            fos.write(b, 0 , len);
+        }
+        //关闭资源
+        fos.flush();
+        fos.close();
+        fis.close();
         return true;
     }
 
@@ -145,5 +151,34 @@ public class FileUtils {
     public boolean renameFile(String originFilePath, String newPath) {
         File file=new File(originFilePath);
         return file.renameTo(new File(newPath));
+    }
+
+    public boolean copyFileToShare(File source,String targetPath) throws IOException {
+        File targetFile = new File(targetPath);
+        if(!targetFile.exists()){
+            if(!targetFile.mkdir())return false;
+        }
+        //如果source是文件夹，则在目的地址中创建新的文件夹
+        if(source.isDirectory()){
+            File file = new File(targetPath+"\\"+source.getName());//用目的地址加上source的文件夹名称，创建新的文件夹
+            if(!file.mkdir())return false;
+            //得到source文件夹的所有文件及目录
+            File[] files = source.listFiles();
+            if(files==null||files.length==0){
+                return false;
+            }else{
+                for (File value : files) {
+                    copyFileToShare(value, file.getPath());
+                }
+            }
+        }
+        //source是文件，则用字节输入输出流复制文件
+        else if(source.isFile()){
+            FileInputStream fis = new FileInputStream(source);
+            //创建新的文件，保存复制内容，文件名称与源文件名称一致
+            File curFile = new File(targetPath+"\\"+source.getName());
+            copyFile(curFile,fis);
+        }
+        return true;
     }
 }

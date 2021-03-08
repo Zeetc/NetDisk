@@ -29,6 +29,7 @@ NetDisk:
   fileStorePath: 'F:/Cui/fileStore'
   userIconFolder: 'UserIcon'
   pageSize: 5
+  shareFolder: 'share'
 
 logging:
   level:

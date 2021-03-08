@@ -36,7 +36,7 @@ public class FileServiceImpl implements FileService {
     public boolean delFile(int fileId) {
         String filePath=fileMapper.getPathById(fileId);
         fileMapper.delFile(fileId);
-        return fileUtils.delFile(filePath);
+        return fileUtils.delFile(filePath,false);
     }
 
     @Override
@@ -175,9 +175,9 @@ public class FileServiceImpl implements FileService {
         List<MyFile> list=new ArrayList<>();
         Map<String,FileTree> childFiles =fileTree.getChildFiles();
         for (Map.Entry<String, FileTree> entry : childFiles.entrySet()) {
-            FileTree child=entry.getValue();
-            MyFile myFile=fileMapper.getFileById(child.getFileId());
-            if(myFile!=null)list.add(myFile);
+            MyFile myFile=new MyFile();
+            myFile.setFilename(entry.getKey());
+            list.add(myFile);
         }
         return list;
     }
@@ -200,5 +200,18 @@ public class FileServiceImpl implements FileService {
         fileMapper.renameFile(fileId,newName);
         fileMapper.renameFilePath(fileId,newPath);
         return fileUtils.renameFile(originFilePath,newPath);
+    }
+
+    @Override
+    public boolean createShareFolder(String path, int[] file) throws IOException {
+        File shareFile=new File(path);
+        if(!shareFile.mkdir())return false;
+        for (int fileId : file) {
+            MyFile myFile=fileMapper.getFileById(fileId);
+            if(!fileUtils.copyFileToShare(new File(myFile.getFilePath()),path)){
+                return false;
+            }
+        }
+        return true;
     }
 }

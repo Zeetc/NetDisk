@@ -14,5 +14,10 @@
       "name": "NetDisk.pageSize",
       "type": "java.lang.Integer",
       "description": "每页显示条数."
+    },
+    {
+      "name": "NetDisk.shareFolder",
+      "type": "java.lang.String",
+      "description": "分享文件夹名字."
     }
   ] }
