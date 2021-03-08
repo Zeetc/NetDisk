@@ -113,16 +113,17 @@ public class FileController {
             sendFilePath=file.getFilePath();
         }
         FileInputStream fis = new FileInputStream(sendFilePath);
-        response.setHeader("content-type", file.getContentType());
+        if(file.getContentType()!=null)response.setContentType(file.getContentType());
+        else response.setContentType("application/x-zip-compressed");
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getFilename(), "UTF-8"));
         writeFileToUser(response, fis);
         fis.close();
         if(file.getContentType()==null){
             File zipFile=new File(sendFilePath);
-            if(zipFile.exists()&&zipFile.delete())return new CommonResult(CommonStatus.OK,"下载成功");
+            if(zipFile.exists()&&zipFile.delete())return null;
             else log.info("删除压缩文件异常，异常文件地址 ： "+sendFilePath);
         }
-        return new CommonResult(CommonStatus.OK, "下载成功");
+        return null;
     }
 
     @ApiIgnore
@@ -267,6 +268,7 @@ public class FileController {
         if(!wantDownload)return new CommonResult(CommonStatus.OK, "查询成功", files);
         File file=new File(FILE_STORE_PATH+"/"+SHARE_FOLD+"/"+uuid+verifyCode+"/"+path);
         if(!file.exists())return new CommonResult(CommonStatus.NOTFOUND,"该文件夹下未找到文件");
+        if(path==null||path.trim().equals(""))return new CommonResult(CommonStatus.NOTFOUND,"无法直接下载根目录，请逐个下载");
         MyFile myFile=new MyFile();
         myFile.setFilePath(FILE_STORE_PATH+"/"+SHARE_FOLD+"/"+uuid+verifyCode+"/"+path);
         myFile.setFilename(file.getName());
