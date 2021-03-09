@@ -207,8 +207,10 @@ public class FileController {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(userId!=id)return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         FileInputStream fis=new FileInputStream(FILE_STORE_PATH+"\\"+USER_ICON_FOLDER+"\\"+id+".jpg");
+        response.setContentType("image/jpeg");
         writeFileToUser(response, fis);
-        return new CommonResult(CommonStatus.OK,"查询成功");
+        fis.close();
+        return null;
     }
 
     @GetMapping("/images/{fileId}")
@@ -218,8 +220,14 @@ public class FileController {
                                  @RequestHeader String Authorization) throws IOException {
         if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         MyFile myFile= fileService.getFileById(fileId);
-        if(myFile==null||!myFile.getContentType().toLowerCase().startsWith("images/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
-        return packFileToUser(response, Authorization, myFile);
+        if(myFile==null||!myFile.getContentType().toLowerCase().startsWith("image/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
+        int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        if(userId!= myFile.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+        FileInputStream fis=new FileInputStream(myFile.getFilePath());
+        response.setContentType(myFile.getContentType());
+        writeFileToUser(response, fis);
+        fis.close();
+        return null;
     }
 
     @GetMapping("/enjoy/{fileId}")
@@ -230,20 +238,16 @@ public class FileController {
         if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         MyFile myFile= fileService.getFileById(fileId);
         if(myFile==null)return new CommonResult(CommonStatus.NOTFOUND,"未找到文件");
-        String contentType= myFile.getContentType().toLowerCase();
-        if(!contentType.startsWith("audio/")|| !contentType.startsWith("video/")){
-            return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取音频类型");
-        }
-        return packFileToUser(response, Authorization, myFile);
-    }
-
-    @ApiIgnore
-    private CommonResult packFileToUser(@ApiIgnore HttpServletResponse response, @RequestHeader String Authorization, MyFile myFile) throws IOException {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(userId!= myFile.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
+        String contentType= myFile.getContentType().toLowerCase();
+        if(!contentType.startsWith("audio/")|| !contentType.startsWith("video/")){
+            return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取音频或视频类型");
+        }
         FileInputStream fis=new FileInputStream(myFile.getFilePath());
         response.setContentType(myFile.getContentType());
         writeFileToUser(response, fis);
+        fis.close();
         return null;
     }
 
