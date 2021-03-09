@@ -90,7 +90,7 @@ public class FileUtils {
             //得到source文件夹的所有文件及目录
             File[] files = source.listFiles();
             if(files==null||files.length==0){
-                return false;
+                return true;
             }else{
                 for (File value : files) {
                     copyFileTo(value, file.getPath(), uid, myFile.getFileId());
@@ -165,7 +165,7 @@ public class FileUtils {
             //得到source文件夹的所有文件及目录
             File[] files = source.listFiles();
             if(files==null||files.length==0){
-                return false;
+                return true;
             }else{
                 for (File value : files) {
                     copyFileToShare(value, file.getPath());

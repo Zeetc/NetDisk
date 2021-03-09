@@ -172,6 +172,12 @@ public class FileController {
                                   @RequestParam(value = "pid",required = false,defaultValue = "-1")int pid,
                                   @RequestHeader String Authorization) throws IOException {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
+        List<MyFile> list=fileService.findByInfo(pid,userId,1,PAGE_SIZE,foldName,false,false);
+        for (MyFile file : list) {
+            if(file.getFilename().equals(foldName)){
+                return new CommonResult(CommonStatus.FORBIDDEN,"当前文件夹下有重名文件");
+            }
+        }
         if(!foldName.equals("")&&fileService.createFolder(foldName,userId,pid)){
             return new CommonResult(CommonStatus.OK,"添加文件夹成功");
         }
@@ -212,12 +218,33 @@ public class FileController {
                                  @RequestHeader String Authorization) throws IOException {
         if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
         MyFile myFile= fileService.getFileById(fileId);
-        if(myFile==null||myFile.getContentType().toLowerCase().startsWith("images/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
+        if(myFile==null||!myFile.getContentType().toLowerCase().startsWith("images/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
+        return packFileToUser(response, Authorization, myFile);
+    }
+
+    @GetMapping("/enjoy/{fileId}")
+    @ApiOperation("在线播放音乐类型或者视频的文件")
+    public CommonResult getMusic(@PathVariable("fileId")Integer fileId,
+                                 @ApiIgnore HttpServletResponse response,
+                                 @RequestHeader String Authorization) throws IOException {
+        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
+        MyFile myFile= fileService.getFileById(fileId);
+        if(myFile==null)return new CommonResult(CommonStatus.NOTFOUND,"未找到文件");
+        String contentType= myFile.getContentType().toLowerCase();
+        if(!contentType.startsWith("audio/")|| !contentType.startsWith("video/")){
+            return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取音频类型");
+        }
+        return packFileToUser(response, Authorization, myFile);
+    }
+
+    @ApiIgnore
+    private CommonResult packFileToUser(@ApiIgnore HttpServletResponse response, @RequestHeader String Authorization, MyFile myFile) throws IOException {
         int userId= Integer.parseInt(Objects.requireNonNull(JwtTokenUtil.getUsernameFromToken(Authorization)));
         if(userId!= myFile.getUid())return new CommonResult(CommonStatus.FORBIDDEN,"无权限");
         FileInputStream fis=new FileInputStream(myFile.getFilePath());
+        response.setContentType(myFile.getContentType());
         writeFileToUser(response, fis);
-        return new CommonResult(CommonStatus.OK,"查询成功");
+        return null;
     }
 
     @PostMapping("/updateIcon")

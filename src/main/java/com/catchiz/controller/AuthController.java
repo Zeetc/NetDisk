@@ -137,7 +137,7 @@ public class AuthController {
         int red, green, blue;
         // 随机产生codeCount数字的验证码。
         String s = redisTemplate.opsForValue().get(Authorization);
-        if (s == null || s.equals("")) s = "Wrong";
+        if (s == null || s.equals("")) s = "WASD";
         for (int i = 0; i < codeCount; i++) {
             // 得到随机产生的验证码数字。
             String strRand = s.charAt(i) + "";
