@@ -127,7 +127,7 @@ public class FileController {
     }
 
     @ApiIgnore
-    private void writeFileToUser(HttpServletResponse response, FileInputStream fis) throws IOException {
+    public static void writeFileToUser(HttpServletResponse response, FileInputStream fis) throws IOException {
         ServletOutputStream sos=response.getOutputStream();
         byte[] buff=new byte[1024*8];
         int len;

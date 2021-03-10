@@ -6,7 +6,11 @@ import com.catchiz.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -100,6 +104,20 @@ public class ManagerController {
         if(check==null)return new CommonResult(CommonStatus.FORBIDDEN,"参数不能为空");
         if(check==0)return new CommonResult(CommonStatus.OK,"查询成功",fileService.getAllUnCheckedFile());
         return new CommonResult(CommonStatus.OK,"查询成功",fileService.getAllCheckedFile());
+    }
+
+    @GetMapping("/images/{fileId}")
+    @ApiOperation("获取图片的预览,传入fileId")
+    public CommonResult getImage(@PathVariable("fileId")Integer fileId,
+                                 @ApiIgnore HttpServletResponse response) throws IOException {
+        if(fileId==null)return new CommonResult(CommonStatus.FORBIDDEN,"文件id参数不能为空");
+        MyFile myFile= fileService.getFileById(fileId);
+        if(myFile==null||!myFile.getContentType().toLowerCase().startsWith("image/"))return new CommonResult(CommonStatus.FORBIDDEN,"只允许获取图片类型");
+        FileInputStream fis=new FileInputStream(myFile.getFilePath());
+        response.setContentType(myFile.getContentType());
+        FileController.writeFileToUser(response, fis);
+        fis.close();
+        return null;
     }
 
 }
