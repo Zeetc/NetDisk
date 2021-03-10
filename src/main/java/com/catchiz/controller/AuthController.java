@@ -157,6 +157,7 @@ public class AuthController {
         // 将图像输出到Servlet输出流中。
         ServletOutputStream sos = response.getOutputStream();
         ImageIO.write(buffImg, "jpeg", sos);
+        sos.flush();
         sos.close();
     }
 
